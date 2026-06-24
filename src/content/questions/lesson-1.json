@@ -1,0 +1,81 @@
+{
+  "lessonId": "lesson-1",
+  "title": "What is a Vector?",
+  "topic": "Vectors",
+  "intro": {
+    "title": "What Is a Vector?",
+    "paragraphs": [
+      "A vector is an arrow with both a magnitude (length) and a direction.",
+      "The vector ⟨0, 2⟩ points 2 units up."
+    ],
+    "sampleVector": [0, 2],
+    "sampleVectorLabel": "⟨0, 2⟩"
+  },
+  "questions": [
+    {
+      "id": "l1-q1",
+      "type": "drawVector",
+      "prompt": "Draw a vector with magnitude 3 and direction 0° (pointing right along the x-axis).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [3, 0],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 0° points straight right. Keep y = 0 and move 3 units along the positive x-axis.",
+      "explanation": "Magnitude 3 at 0° lands the tip at ⟨3, 0⟩: 3 units right, 0 units up.",
+      "order": 1
+    },
+    {
+      "id": "l1-q2",
+      "type": "drawVector",
+      "prompt": "Draw a vector with magnitude 4 and direction 90° (pointing straight up).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [0, 4],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 90° points straight up. Keep x = 0 and move 4 units along the positive y-axis.",
+      "explanation": "Magnitude 4 at 90° lands the tip at ⟨0, 4⟩: 0 units right, 4 units up.",
+      "order": 2
+    },
+    {
+      "id": "l1-q3",
+      "type": "drawVector",
+      "prompt": "Draw a vector with magnitude 3 and direction 180° (pointing left).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [-3, 0],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 180° points straight left. Keep y = 0 and move 3 units along the negative x-axis.",
+      "explanation": "Magnitude 3 at 180° lands the tip at ⟨−3, 0⟩: 3 units left, 0 units up.",
+      "order": 3
+    },
+    {
+      "id": "l1-q4",
+      "type": "drawVector",
+      "prompt": "Draw a vector with magnitude 2√2 (about 2.8) and direction 45° (up and to the right).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [2, 2],
+        "tolerance": 0.35
+      },
+      "hint": "At 45° the horizontal and vertical parts are equal. A magnitude of 2√2 splits into 2 right and 2 up.",
+      "explanation": "At 45° the components are equal. Magnitude 2√2 gives ⟨2, 2⟩, since √(2² + 2²) = √8 = 2√2.",
+      "order": 4
+    },
+    {
+      "id": "l1-q5",
+      "type": "drawVector",
+      "prompt": "Draw a vector with magnitude 3√2 (about 4.2) and direction 135° (up and to the left).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [-3, 3],
+        "tolerance": 0.35
+      },
+      "hint": "135° points up and to the left, with equal horizontal and vertical parts. Magnitude 3√2 splits into 3 left and 3 up.",
+      "explanation": "At 135° the tip moves equally left and up. Magnitude 3√2 gives ⟨−3, 3⟩, since √((−3)² + 3²) = √18 = 3√2.",
+      "order": 5
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "lessonId": "lesson-1",
+    "title": "What is a Vector?",
+    "topic": "Vectors",
+    "lessonOrder": 1
+  },
+  {
+    "lessonId": "lesson-2",
+    "title": "Vector Addition",
+    "topic": "Vector Operations",
+    "lessonOrder": 2
+  },
+  {
+    "lessonId": "lesson-3",
+    "title": "Scalar Multiplication",
+    "topic": "Vector Operations",
+    "lessonOrder": 3
+  },
+  {
+    "lessonId": "lesson-4",
+    "title": "Vector Subtraction",
+    "topic": "Vector Operations",
+    "lessonOrder": 4
+  }
+]

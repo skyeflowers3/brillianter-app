@@ -1,0 +1,25 @@
+/* tokens.css — shared design tokens (additive to existing :root vars in index.css/lesson.css).
+   Load order: imported FIRST in src/main.tsx (right after './index.css') so these
+   custom properties are available everywhere. Do not remove existing variables. */
+
+/* Breakpoints (reference for media queries in responsive.css):
+   small phone ≤ 400px · phone ≤ 640px · tablet ≤ 1024px */
+
+:root {
+  /* Minimum comfortable touch-target size. */
+  --touch-target: 44px;
+
+  /* Spacing scale. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Fluid type tokens. */
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.25rem;
+  --font-xl: clamp(1.5rem, 4vw, 2rem);
+}

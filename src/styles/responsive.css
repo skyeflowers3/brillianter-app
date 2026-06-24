@@ -1,0 +1,107 @@
+/* responsive.css — responsive overrides for 320px → tablet width.
+   Load order: imported LAST in src/App.tsx (after './styles/app.css') so these
+   media-query overrides win on specificity ties. Tokens come from tokens.css. */
+
+/* Breakpoints: small phone ≤ 400px · phone ≤ 640px · tablet ≤ 1024px */
+
+/* ---- Touch targets (coarse pointers) ---- */
+@media (pointer: coarse) {
+  .button,
+  .multiple-choice-option {
+    min-height: var(--touch-target);
+  }
+
+  .lesson-stepper__step {
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+  }
+
+  .column-vector__field,
+  .scalar-value-input__field {
+    min-height: var(--touch-target);
+  }
+
+  /* Enlarge SVG drag-handle hit area on touch. The base radius is set as an `r`
+     attribute in TSX (e.g. r={0.5}); CSS `r` overrides presentation attributes
+     in modern browsers. See the TODO below for the component-level fallback. */
+  .vector__hit-target {
+    r: 0.8px;
+  }
+  /* TODO(integration): enlarge SVG drag handle hit area for touch — hit radius is
+     set via the `r` prop in Vector.tsx / question components; bump it there for
+     guaranteed cross-browser touch sizing if the CSS `r` override is unreliable. */
+}
+
+/* ---- Tablet and below ---- */
+@media (max-width: 1024px) {
+  .lesson-engine,
+  .skillcheck,
+  .dashboard {
+    max-width: 100%;
+  }
+}
+
+/* ---- Phone ---- */
+@media (max-width: 640px) {
+  .app-main {
+    padding: var(--space-4);
+  }
+
+  .app-header {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .app-header__actions {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .app-header__actions .button {
+    flex: 1 1 auto;
+  }
+
+  .dashboard__lesson-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-card {
+    padding: var(--space-4);
+  }
+
+  .lesson-card__actions {
+    flex-direction: column;
+  }
+
+  .lesson-card__actions .lesson-card__cta,
+  .lesson-card__actions .button {
+    width: 100%;
+  }
+
+  .multiple-choice-question__options {
+    grid-template-columns: 1fr;
+  }
+
+  .skillcheck-results__card {
+    padding: var(--space-5);
+  }
+
+  .lesson-complete__card {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+/* ---- Small phones (≤ 400px) ---- */
+@media (max-width: 400px) {
+  .app-main {
+    padding: var(--space-3);
+  }
+
+  .app-header__user {
+    display: none;
+  }
+
+  .dashboard__intro h1 {
+    font-size: 1.5rem;
+  }
+}

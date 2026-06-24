@@ -1,0 +1,49 @@
+{
+  "lessonId": "lesson-1",
+  "title": "What is a Vector?",
+  "topic": "Vectors",
+  "questions": [
+    {
+      "id": "l1-sc-1",
+      "type": "drawVector",
+      "isSkillCheck": true,
+      "prompt": "Draw a vector with magnitude 4 and direction 0° (pointing right along the x-axis).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [4, 0],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 0° points straight right. Keep y = 0 and move 4 units along the positive x-axis.",
+      "explanation": "Magnitude 4 at 0° lands the tip at ⟨4, 0⟩: 4 units right and 0 units up. The first number tells you the horizontal movement and the second the vertical movement, so a vector pointing straight right has a y-component of 0.",
+      "order": 1
+    },
+    {
+      "id": "l1-sc-2",
+      "type": "drawVector",
+      "isSkillCheck": true,
+      "prompt": "Draw a vector with magnitude 3 and direction 270° (pointing straight down).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [0, -3],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 270° points straight down. Keep x = 0 and move 3 units along the negative y-axis.",
+      "explanation": "Magnitude 3 at 270° lands the tip at ⟨0, −3⟩: 0 units horizontally and 3 units down. Pointing straight down means there is no left/right movement (x = 0) and the vertical component is negative.",
+      "order": 2
+    },
+    {
+      "id": "l1-sc-3",
+      "type": "drawVector",
+      "isSkillCheck": true,
+      "prompt": "Draw a vector with magnitude 2√2 (about 2.8) and direction 225° (down and to the left).",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [-2, -2],
+        "tolerance": 0.35
+      },
+      "hint": "At 225° the horizontal and vertical parts are equal, and both point in the negative direction. A magnitude of 2√2 splits into 2 left and 2 down.",
+      "explanation": "At 225° the tip moves equally left and down, so the components are equal and both negative. Magnitude 2√2 gives ⟨−2, −2⟩, since √((−2)² + (−2)²) = √8 = 2√2.",
+      "order": 3
+    }
+  ]
+}

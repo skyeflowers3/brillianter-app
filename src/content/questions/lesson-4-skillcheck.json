@@ -1,0 +1,57 @@
+{
+  "lessonId": "lesson-4",
+  "title": "Vector Subtraction",
+  "topic": "Vector Operations",
+  "questions": [
+    {
+      "id": "l4-sc-1",
+      "type": "negateVector",
+      "isSkillCheck": true,
+      "prompt": "Find −B = −1 · B. Drag the tip of the arrow through the origin.",
+      "referenceLabel": "B = ⟨3, 2⟩",
+      "correctAnswer": {
+        "type": "negateVector",
+        "baseVector": [3, 2],
+        "tolerance": 0.35
+      },
+      "hint": "−B = −1 · B. Just like scalar multiplication, multiply each component of B by −1.",
+      "explanation": "−B is scalar multiplication by −1: −1 · ⟨3, 2⟩ = ⟨−1 · 3, −1 · 2⟩ = ⟨−3, −2⟩. The length stays the same and the direction flips to point the opposite way.",
+      "order": 1
+    },
+    {
+      "id": "l4-sc-2",
+      "type": "vectorSubtract",
+      "gated": true,
+      "additionForm": true,
+      "isSkillCheck": true,
+      "prompt": "First reverse B to make −B. Then it's just addition: connect −B head-to-tail to A, draw A + (−B), and enter what A + (−B) is.",
+      "referenceLabel": "A = ⟨4, 1⟩, B = ⟨1, 3⟩",
+      "correctAnswer": {
+        "type": "vectorSubtract",
+        "vectorA": [4, 1],
+        "vectorB": [1, 3],
+        "tolerance": 0.35
+      },
+      "hint": "Once you have −B, this is just A + (−B). Reverse B: −⟨1, 3⟩ = ⟨−1, −3⟩, then add. Look at the green arrow from the origin and count how far it goes right or left and up or down.",
+      "explanation": "Subtracting is the same as adding the opposite: A − B = A + (−B). Reverse B to get −B = ⟨−1, −3⟩, then add: ⟨4, 1⟩ + ⟨−1, −3⟩ = ⟨4 + (−1), 1 + (−3)⟩ = ⟨3, −2⟩.",
+      "order": 2
+    },
+    {
+      "id": "l4-sc-3",
+      "type": "vectorSubtract",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "Now try it on your own! Reverse B and add A + (−B) to find A − B.",
+      "referenceLabel": "A = ⟨−1, 2⟩, B = ⟨2, −1⟩",
+      "correctAnswer": {
+        "type": "vectorSubtract",
+        "vectorA": [-1, 2],
+        "vectorB": [2, -1],
+        "tolerance": 0.35
+      },
+      "hint": "A − B = A + (−B). Flip B's signs to get −B, then look at the A − B arrow from the origin: count how far right or left and up or down it goes.",
+      "explanation": "A − B = A + (−B) = ⟨−1, 2⟩ + ⟨−2, 1⟩ = ⟨−1 + (−2), 2 + 1⟩ = ⟨−3, 3⟩.",
+      "order": 3
+    }
+  ]
+}

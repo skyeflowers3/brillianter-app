@@ -1,0 +1,161 @@
+.skillcheck {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.skillcheck__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.skillcheck__eyebrow {
+  margin: 0;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.skillcheck__title {
+  margin: 4px 0 0;
+  font-size: 1.75rem;
+}
+
+.skillcheck__progress {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.skillcheck__prompt h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.skillcheck__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.skillcheck__actions .button {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skillcheck-results {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.skillcheck-results__card {
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.skillcheck-results__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.skillcheck-results__score {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1.2;
+}
+
+.skillcheck-results__subtitle {
+  margin: 12px 0 0;
+  color: var(--text);
+}
+
+.skillcheck-results__perfect {
+  margin: 12px 0 0;
+  font-weight: 600;
+  color: var(--lesson-correct, #15803d);
+}
+
+.skillcheck-review {
+  margin-top: 24px;
+}
+
+.skillcheck-review__heading {
+  margin: 0 0 12px;
+  font-size: 1.125rem;
+}
+
+.skillcheck-review__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.skillcheck-review__item {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--lesson-incorrect, #b91c1c);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.skillcheck-review__prompt {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.skillcheck-review__explanation {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.skillcheck-results__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.skillcheck-results__actions .button {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .skillcheck__title {
+    font-size: 1.5rem;
+  }
+
+  .skillcheck__actions,
+  .skillcheck-results__actions {
+    flex-direction: column;
+  }
+
+  .skillcheck__actions .button,
+  .skillcheck-results__actions .button {
+    width: 100%;
+  }
+}

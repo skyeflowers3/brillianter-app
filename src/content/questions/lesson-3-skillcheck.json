@@ -1,0 +1,65 @@
+{
+  "lessonId": "lesson-3",
+  "title": "Scalar Multiplication",
+  "topic": "Vector Operations",
+  "questions": [
+    {
+      "id": "l3-sc-1",
+      "type": "scalarSlider",
+      "mode": "createVector",
+      "isSkillCheck": true,
+      "prompt": "Drag the head of the vector to create 2A, then enter the resulting vector.",
+      "referenceLabel": "A = ⟨1, 2⟩",
+      "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "correctAnswer": {
+        "type": "scalarSlider",
+        "baseVector": [1, 2],
+        "scalar": 2,
+        "tolerance": 0.1
+      },
+      "hint": "2A multiplies each component of A by 2. Drag the head outward until c = 2 and read off ⟨2·1, 2·2⟩.",
+      "explanation": "2 · ⟨1, 2⟩ = ⟨2·1, 2·2⟩ = ⟨2, 4⟩. Multiplying by a positive scalar stretches the length while the direction stays the same.",
+      "order": 1
+    },
+    {
+      "id": "l3-sc-2",
+      "type": "scalarSlider",
+      "mode": "findScalar",
+      "isSkillCheck": true,
+      "prompt": "Drag the head of the vector until c·A matches ⟨−3, −6⟩, then enter the scalar c.",
+      "referenceLabel": "A = ⟨1, 2⟩",
+      "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "correctAnswer": {
+        "type": "scalarSlider",
+        "baseVector": [1, 2],
+        "scalar": -3,
+        "tolerance": 0.1
+      },
+      "hint": "⟨−3, −6⟩ points opposite to A and is three times as long, so c must be negative. What number times 1 gives −3?",
+      "explanation": "c · ⟨1, 2⟩ = ⟨−3, −6⟩ means 1c = −3 and 2c = −6, so c = −3. The negative scalar flips the direction and |−3| = 3 triples the length.",
+      "order": 2
+    },
+    {
+      "id": "l3-sc-3",
+      "type": "multipleChoice",
+      "isSkillCheck": true,
+      "prompt": "Which of the following could be written as cA? Select all that apply.",
+      "referenceLabel": "A = ⟨2, 3⟩",
+      "options": [
+        { "id": "o1", "label": "⟨4, 6⟩" },
+        { "id": "o2", "label": "⟨3, 2⟩" },
+        { "id": "o3", "label": "⟨−2, −3⟩" },
+        { "id": "o4", "label": "⟨6, 9⟩" },
+        { "id": "o5", "label": "⟨2, 2⟩" },
+        { "id": "o6", "label": "⟨4, 9⟩" }
+      ],
+      "correctAnswer": {
+        "type": "multipleChoice",
+        "correctOptionIds": ["o1", "o3", "o4"]
+      },
+      "hint": "A vector is cA only if BOTH components are the same multiple of A. Since A = ⟨2, 3⟩, cA = ⟨2c, 3c⟩.",
+      "explanation": "⟨2c, 3c⟩ gives ⟨4, 6⟩ (c = 2), ⟨−2, −3⟩ (c = −1), and ⟨6, 9⟩ (c = 3). The others change the ratio between the components, so they can't be written as cA.",
+      "order": 3
+    }
+  ]
+}
