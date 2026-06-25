@@ -14,19 +14,35 @@ import type { LessonContent } from '../types/lesson'
 import type { LessonEnginePersistHandlers } from '../types/lessonEngine'
 import type { LessonProgress, QuestionHistoryEntry } from '../types/progress'
 import { isLessonAvailable } from '../types/lessonMetadata'
+import { isLessonUnlocked } from '../lib/lessonAccess'
 import '../styles/lesson.css'
 
 export function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>()
   const { user } = useAuth()
-  const { getProgress, upsertProgress } = useProgressContext()
+  const {
+    getProgress,
+    upsertProgress,
+    progressByLesson,
+    loading: progressLoading,
+  } = useProgressContext()
   const [lesson, setLesson] = useState<LessonContent | null>(null)
   const [progress, setProgress] = useState<LessonProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // null = still determining (progress loading); true/false = access decided. Kept as a primitive
+  // so it stays referentially stable across progress updates and never re-triggers the load effect.
+  const unlocked =
+    lessonId && !progressLoading ? isLessonUnlocked(lessonId, progressByLesson) : null
+
   useEffect(() => {
     if (!lessonId || !user) {
+      return
+    }
+
+    // Don't load (or create progress for) a lesson the learner hasn't unlocked yet.
+    if (unlocked !== true) {
       return
     }
 
@@ -78,7 +94,7 @@ export function LessonPage() {
     return () => {
       cancelled = true
     }
-  }, [lessonId, user])
+  }, [lessonId, user, unlocked])
 
   const persistHandlers = useMemo<LessonEnginePersistHandlers | undefined>(() => {
     if (!user || !lessonId || !progress) {
@@ -145,6 +161,16 @@ export function LessonPage() {
     return (
       <section className="lesson-error">
         <h1>Lesson not found</h1>
+        <Link to="/dashboard">Back to dashboard</Link>
+      </section>
+    )
+  }
+
+  if (unlocked === false) {
+    return (
+      <section className="lesson-error">
+        <h1>Lesson locked</h1>
+        <p className="muted">Complete the previous lesson to unlock this one.</p>
         <Link to="/dashboard">Back to dashboard</Link>
       </section>
     )

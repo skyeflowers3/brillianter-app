@@ -36,3 +36,15 @@ export function getNextLessonId(lessonId: string): string | null {
 
   return sorted[index + 1].lessonId
 }
+
+/** The lesson immediately before this one by order, or null if it is the first lesson. */
+export function getPreviousLessonId(lessonId: string): string | null {
+  const sorted = [...LESSONS].sort((a, b) => a.lessonOrder - b.lessonOrder)
+  const index = sorted.findIndex((lesson) => lesson.lessonId === lessonId)
+
+  if (index <= 0) {
+    return null
+  }
+
+  return sorted[index - 1].lessonId
+}

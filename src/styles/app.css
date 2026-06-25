@@ -259,6 +259,16 @@
   opacity: 0.72;
 }
 
+.lesson-card--locked {
+  opacity: 0.72;
+}
+
+.lesson-card__lock-hint {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
 .lesson-card__header {
   display: flex;
   align-items: center;
@@ -280,7 +290,8 @@
   border-radius: 999px;
 }
 
-.lesson-card__status--coming_soon {
+.lesson-card__status--coming_soon,
+.lesson-card__status--locked {
   background: var(--code-bg);
   color: var(--text);
 }

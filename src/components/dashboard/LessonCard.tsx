@@ -6,25 +6,31 @@ import { deriveLessonStatus, type LessonProgress, type LessonStatus } from '../.
 interface LessonCardProps {
   lesson: LessonMetadata
   progress: LessonProgress | null
+  /** When true the lesson is gated behind completing the previous one. */
+  locked?: boolean
 }
 
-const STATUS_LABELS: Record<LessonStatus, string> = {
+// Includes a synthetic "locked" key (not a real LessonStatus) for sequential gating.
+const STATUS_LABELS: Record<LessonStatus | 'locked', string> = {
   coming_soon: 'Coming soon',
+  locked: 'Locked',
   not_started: 'Not started',
   in_progress: 'In progress',
   complete: 'Complete',
 }
 
-export function LessonCard({ lesson, progress }: LessonCardProps) {
+export function LessonCard({ lesson, progress, locked = false }: LessonCardProps) {
   const available = isLessonAvailable(lesson.lessonId)
   const status = deriveLessonStatus(available, progress)
-  const label = STATUS_LABELS[status]
+  const isLocked = available && locked
+  const displayStatus = !available ? 'coming_soon' : isLocked ? 'locked' : status
+  const label = STATUS_LABELS[displayStatus]
 
   const body = (
     <>
       <div className="lesson-card__header">
         <span className="lesson-card__order">Lesson {lesson.lessonOrder}</span>
-        <span className={`lesson-card__status lesson-card__status--${status}`}>{label}</span>
+        <span className={`lesson-card__status lesson-card__status--${displayStatus}`}>{label}</span>
       </div>
       <h3 className="lesson-card__title">{lesson.title}</h3>
       <p className="lesson-card__topic">{lesson.topic}</p>
@@ -35,6 +41,25 @@ export function LessonCard({ lesson, progress }: LessonCardProps) {
     return (
       <article className="lesson-card lesson-card--disabled" aria-disabled="true">
         {body}
+      </article>
+    )
+  }
+
+  if (isLocked) {
+    return (
+      <article className="lesson-card lesson-card--locked" aria-disabled="true">
+        {body}
+        <div className="lesson-card__actions">
+          <button
+            type="button"
+            className="button button--primary lesson-card__cta"
+            disabled
+            aria-disabled="true"
+          >
+            Start
+          </button>
+        </div>
+        <p className="lesson-card__lock-hint">Complete the previous lesson to unlock this one.</p>
       </article>
     )
   }
