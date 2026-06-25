@@ -1,5 +1,3 @@
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '../firebase'
 import lesson1 from '../content/questions/lesson-1.json'
 import lesson2 from '../content/questions/lesson-2.json'
 import lesson3 from '../content/questions/lesson-3.json'
@@ -65,23 +63,11 @@ function getLocalQuestions(lessonId: string): Question[] {
   return [...questions].sort((a, b) => a.order - b.order)
 }
 
+/**
+ * Questions ship in the app bundle, so this resolves instantly with no network round-trip.
+ * Firestore is reserved for per-user data (auth, progress); updating questions requires a redeploy.
+ */
 export async function fetchQuestions(lessonId: string): Promise<Question[]> {
-  try {
-    const questionsQuery = query(
-      collection(db, 'questions'),
-      where('lessonId', '==', lessonId),
-    )
-    const snapshot = await getDocs(questionsQuery)
-
-    if (!snapshot.empty) {
-      return snapshot.docs
-        .map((entry) => entry.data() as Question)
-        .sort((a, b) => a.order - b.order)
-    }
-  } catch (error) {
-    console.warn(`Falling back to local questions for ${lessonId}.`, error)
-  }
-
   return getLocalQuestions(lessonId)
 }
 
