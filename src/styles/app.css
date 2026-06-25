@@ -22,9 +22,9 @@
 
 .app-header__brand {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
   text-decoration: none;
   color: inherit;
   border-radius: 8px;
@@ -37,7 +37,7 @@
 }
 
 .app-header__brand:hover .app-header__logo {
-  color: var(--accent);
+  opacity: 0.8;
 }
 
 .app-header__brand:focus-visible {
@@ -46,9 +46,11 @@
 }
 
 .app-header__logo {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-h);
+  font-family: 'Fredoka', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-size: 1.925rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
 }
 
 .app-header__subtitle {
@@ -72,19 +74,41 @@
   padding: 24px;
 }
 
+/* Login screen: a soft purple-tinted backdrop so the card reads as a raised surface. */
+.auth-page {
+  background:
+    radial-gradient(1100px 560px at 50% -15%, var(--accent-bg), transparent 70%),
+    linear-gradient(160deg, rgba(170, 59, 255, 0.12), rgba(170, 59, 255, 0.02) 60%);
+}
+
 .auth-card {
   width: min(100%, 420px);
-  padding: 32px;
+  padding: 36px 32px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 20px;
   background: var(--bg);
-  box-shadow: var(--shadow);
+  /* Layered shadow + accent glow for a 3D, lifted feel. */
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.06),
+    0 18px 32px -12px rgba(170, 59, 255, 0.35),
+    0 28px 56px -20px rgba(16, 24, 40, 0.25);
   text-align: left;
 }
 
 .auth-card h1 {
   margin: 0 0 8px;
   font-size: 1.75rem;
+}
+
+.auth-card__brand {
+  margin: 0 0 24px;
+  text-align: center;
+  font-family: 'Fredoka', system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 2.5rem;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  line-height: 1.1;
 }
 
 .auth-card__subtitle,
@@ -95,6 +119,13 @@
 
 .auth-card__subtitle {
   margin: 0 0 24px;
+  text-align: center;
+}
+
+/* Give the non-primary buttons a clearly visible boundary against the card (accessibility). */
+.auth-card .button--secondary,
+.auth-card .google-button {
+  border-color: var(--input-border);
 }
 
 .auth-card__footer {
@@ -134,9 +165,9 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
-  background: var(--bg);
+  background: var(--input-bg);
   color: var(--text-h);
   font: inherit;
 }
@@ -224,19 +255,67 @@
 
 .dashboard__intro {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.dashboard__intro h1 {
-  margin: 0 0 8px;
-  font-size: 2rem;
+.dashboard__greeting {
+  margin: 0;
+  font-size: 1.5rem;
 }
 
 .dashboard__intro p {
   margin: 0;
+}
+
+.progress-card {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.progress-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.progress-card__title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.progress-card__count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.progress-card__track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress-card__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.progress-card__caption {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text);
 }
 
 .dashboard__lesson-grid {

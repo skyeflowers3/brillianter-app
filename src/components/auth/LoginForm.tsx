@@ -52,10 +52,7 @@ export function LoginForm() {
 
   return (
     <div className="auth-card">
-      <h1>Welcome to Brillianter</h1>
-      <p className="auth-card__subtitle">
-        Sign in to start learning linear algebra through interaction.
-      </p>
+      <h1 className="auth-card__brand">Brillianter</h1>
 
       <form className="auth-form" onSubmit={handleEmailSignIn}>
         <label className="field">
