@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore'
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? 'AIzaSyBAFN0p0alhkbRcOiyz6uoqw85T3TClVUE',
   authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? 'brillianter-app.firebaseapp.com',
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? 'brillianter-app.web.app',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ?? 'brillianter-app',
   storageBucket:
     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ??
