@@ -27,6 +27,9 @@ export interface SkillCheckHistoryEntry {
   answers: SkillCheckAnswer[]
 }
 
+/** Lesson mastery tier derived from the learner's best skill-check score. */
+export type MasteryStatus = 'mastered' | 'developing' | 'needs_review'
+
 export interface LessonProgress {
   userId: string
   lessonId: string
@@ -42,6 +45,19 @@ export interface LessonProgress {
   skillCheckHistory: SkillCheckHistoryEntry[]
   /** True after submit until the learner clicks Continue */
   awaitingContinue: boolean
+  /** Score from the most recent skill-check attempt. Absent until a skill check is recorded. */
+  latestSkillCheckScore?: number
+  /** Best skill-check score across all attempts — mastery is based on this, not the latest. */
+  highestSkillCheckScore?: number
+  /** Number of skill-check attempts completed for this lesson. */
+  skillCheckAttempts: number
+  /** Mastery tier from the highest score. Absent until a skill check is recorded. */
+  masteryStatus?: MasteryStatus
+  /**
+   * True once the learner has completed the required retake after a Needs Review score. Used to
+   * unlock the next lesson regardless of the retake score (so they can never get permanently stuck).
+   */
+  requiredRetakeCompleted: boolean
 }
 
 export type LessonProgressInput = Omit<LessonProgress, 'userId' | 'lessonId'>
@@ -65,6 +81,8 @@ export function createDefaultProgress(userId: string, lessonId: string): LessonP
     skillCheckCompleted: false,
     skillCheckHistory: [],
     awaitingContinue: false,
+    skillCheckAttempts: 0,
+    requiredRetakeCompleted: false,
   }
 }
 

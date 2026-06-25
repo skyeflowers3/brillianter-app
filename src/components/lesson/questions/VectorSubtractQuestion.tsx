@@ -188,11 +188,11 @@ export function VectorSubtractQuestion({
           >
             Reverse B
           </button>
-          <p className="vector-subtract-question__help muted">
-            {guided
-              ? 'Step 1: reverse B. Click the button to flip B around the origin and turn it into −B.'
-              : 'Reverse B flips it into −B so you can add it to A.'}
-          </p>
+          {guided && (
+            <p className="vector-subtract-question__help muted">
+              Step 1: reverse B. Click the button to flip B around the origin and turn it into −B.
+            </p>
+          )}
         </div>
       )}
 

@@ -15,6 +15,7 @@ import {
   type SkillCheckHistoryEntry,
   type SkillCheckResult,
 } from '../types/progress'
+import { evaluateMastery } from './masteryService'
 
 export async function getLessonProgress(
   userId: string,
@@ -75,11 +76,29 @@ export async function recordSkillCheckResult(
     answers: result.answers,
   }
 
+  const history = [...(existing.skillCheckHistory ?? []), historyEntry]
+  const attempts = (existing.skillCheckAttempts ?? existing.skillCheckHistory?.length ?? 0) + 1
+
+  // Mastery is based on the best attempt ever, so a weaker retake never demotes the learner.
+  const best = history.reduce((top, entry) =>
+    entry.score / entry.total > top.score / top.total ? entry : top,
+  )
+  const masteryStatus = evaluateMastery(best.score, best.total)
+
+  // The required retake is satisfied once a second attempt exists (the first attempt is the
+  // original skill check, the second is the retake) — this is what lets a stuck learner advance.
+  const requiredRetakeCompleted = existing.requiredRetakeCompleted === true || attempts >= 2
+
   const updated: LessonProgress = {
     ...existing,
     skillCheckCompleted: true,
     skillCheckScore: result.score,
-    skillCheckHistory: [...(existing.skillCheckHistory ?? []), historyEntry],
+    latestSkillCheckScore: result.score,
+    highestSkillCheckScore: best.score,
+    skillCheckHistory: history,
+    skillCheckAttempts: attempts,
+    masteryStatus,
+    requiredRetakeCompleted,
   }
 
   await saveLessonProgress(updated)

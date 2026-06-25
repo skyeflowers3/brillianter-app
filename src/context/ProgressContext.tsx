@@ -9,27 +9,24 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progressByLesson, setProgressByLesson] = useState<Record<string, LessonProgress>>({})
   const [loading, setLoading] = useState(true)
 
+  // Background refresh (e.g. after a skill check is recorded). It deliberately does NOT toggle the
+  // global `loading` flag: flipping loading true->false here would make any page that gates on it
+  // briefly unmount, which silently restarts an in-progress/just-finished skill check. The initial
+  // load below owns the loading state.
   const refreshProgress = useCallback(async () => {
     if (!user) {
       setProgressByLesson({})
-      setLoading(false)
       return
     }
 
-    setLoading(true)
+    const entries = await getAllLessonProgress(user.uid)
+    const next: Record<string, LessonProgress> = {}
 
-    try {
-      const entries = await getAllLessonProgress(user.uid)
-      const next: Record<string, LessonProgress> = {}
-
-      for (const entry of entries) {
-        next[entry.lessonId] = entry
-      }
-
-      setProgressByLesson(next)
-    } finally {
-      setLoading(false)
+    for (const entry of entries) {
+      next[entry.lessonId] = entry
     }
+
+    setProgressByLesson(next)
   }, [user])
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { SkillCheckEngine } from '../components/skillcheck/SkillCheckEngine'
 import { useAuth } from '../hooks/useAuth'
@@ -6,6 +6,7 @@ import { useProgressContext } from '../hooks/useProgressContext'
 import { loadSkillCheckContent } from '../services/questionService'
 import { recordSkillCheckResult } from '../services/progressService'
 import { updateStreak } from '../services/streakService'
+import { randomizeSkillCheck } from '../lib/skillCheckRandomizer'
 import type { LessonContent } from '../types/lesson'
 import type { SkillCheckResult } from '../types/progress'
 import '../components/skillcheck/skillcheck.css'
@@ -13,12 +14,37 @@ import '../components/skillcheck/skillcheck.css'
 export function SkillCheckPage() {
   const { lessonId } = useParams<{ lessonId: string }>()
   const { user, refreshProfile } = useAuth()
-  const { refreshProgress } = useProgressContext()
+  const { getProgress, refreshProgress, loading: progressLoading } = useProgressContext()
   const navigate = useNavigate()
   const [lesson, setLesson] = useState<LessonContent | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [attemptKey, setAttemptKey] = useState(0)
+  // Latches true once the content and the first progress load are both done. After that we never
+  // re-gate on progress loading, so the refreshProgress() call that runs when a skill check finishes
+  // can't unmount/remount the engine (which would silently restart the skill check).
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    if (!initialized && lesson && !progressLoading) {
+      setInitialized(true)
+    }
+  }, [initialized, lesson, progressLoading])
+
+  // Retakes (a prior attempt exists, or the in-page "Retry" was used) get randomized numbers; the
+  // very first attempt uses the authored questions. The set is frozen per attempt — it only
+  // regenerates on the first load or when attemptKey changes — so a progress refresh after finishing
+  // never swaps the questions out from under the results screen.
+  const questions = useMemo(() => {
+    if (!lesson || !initialized) {
+      return []
+    }
+    const priorAttempts = (lessonId ? getProgress(lessonId)?.skillCheckAttempts : 0) ?? 0
+    const isRetake = priorAttempts > 0 || attemptKey > 0
+    return isRetake ? randomizeSkillCheck(lesson.questions) : lesson.questions
+    // getProgress is read intentionally without subscribing, to keep the question set stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson, attemptKey, initialized, lessonId])
 
   useEffect(() => {
     if (!lessonId || !user) {
@@ -88,7 +114,7 @@ export function SkillCheckPage() {
     )
   }
 
-  if (loading) {
+  if (loading || !initialized) {
     return (
       <section className="lesson-error">
         <p className="muted">Loading skill check...</p>
@@ -109,7 +135,7 @@ export function SkillCheckPage() {
   return (
     <SkillCheckEngine
       key={attemptKey}
-      questions={lesson.questions}
+      questions={questions}
       lessonTitle={lesson.title}
       onComplete={(result) => void handleComplete(result)}
       onContinue={() => navigate('/dashboard')}

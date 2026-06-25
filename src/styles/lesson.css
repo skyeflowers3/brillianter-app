@@ -896,12 +896,6 @@
   }
 }
 
-.lesson-complete__badge {
-  font-size: 3rem;
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
 .lesson-complete__title {
   margin: 8px 0 12px;
   font-size: 1.5rem;

@@ -170,7 +170,9 @@ export function LessonPage() {
     return (
       <section className="lesson-error">
         <h1>Lesson locked</h1>
-        <p className="muted">Complete the previous lesson to unlock this one.</p>
+        <p className="muted">
+          Finish the previous lesson and score at least 2/3 on its skill check to unlock this one.
+        </p>
         <Link to="/dashboard">Back to dashboard</Link>
       </section>
     )

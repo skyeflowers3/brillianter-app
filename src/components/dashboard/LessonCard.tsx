@@ -2,6 +2,12 @@ import { Link } from 'react-router-dom'
 import type { LessonMetadata } from '../../types/lessonMetadata'
 import { isLessonAvailable } from '../../types/lessonMetadata'
 import { deriveLessonStatus, type LessonProgress, type LessonStatus } from '../../types/progress'
+import {
+  getBestSkillCheck,
+  getMasteryStatus,
+  isRequiredRetakePending,
+  MASTERY_PRESENTATION,
+} from '../../services/masteryService'
 
 interface LessonCardProps {
   lesson: LessonMetadata
@@ -59,50 +65,97 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
             Start
           </button>
         </div>
-        <p className="lesson-card__lock-hint">Complete the previous lesson to unlock this one.</p>
+        <p className="lesson-card__lock-hint">
+          Finish the previous lesson and score at least 2/3 on its skill check to unlock this one.
+        </p>
       </article>
     )
   }
 
-  const ctaLabel =
-    status === 'complete' ? 'Review lesson' : status === 'in_progress' ? 'Continue' : 'Start'
-
   const lessonComplete = status === 'complete'
   const skillCheckDone = Boolean(progress?.skillCheckCompleted)
-  const latestSkillCheck = progress?.skillCheckHistory?.[progress.skillCheckHistory.length - 1]
+  const masteryStatus = getMasteryStatus(progress)
+  const bestSkillCheck = progress ? getBestSkillCheck(progress) : null
+  // While a required retake is still owed the next lesson stays locked, so we nudge a Retake. Once
+  // it's been taken twice (next lesson unlocked, regardless of score), it becomes Improve Mastery.
+  const retakePending = isRequiredRetakePending(progress)
+
+  const lessonHref = `/lesson/${lesson.lessonId}`
+  const skillCheckHref = `/skill-check/${lesson.lessonId}`
+
+  // Non-complete lessons keep the original Start/Continue CTA.
+  if (!lessonComplete) {
+    const ctaLabel = status === 'in_progress' ? 'Continue' : 'Start'
+    return (
+      <article className="lesson-card">
+        {body}
+        <div className="lesson-card__actions">
+          <Link to={lessonHref} className="button button--primary lesson-card__cta">
+            {ctaLabel}
+          </Link>
+        </div>
+      </article>
+    )
+  }
+
+  const reviewLessonLink = (
+    <Link to={lessonHref} className="button button--secondary lesson-card__cta">
+      Review lesson
+    </Link>
+  )
 
   return (
     <article className="lesson-card">
       {body}
 
-      {lessonComplete && (
-        <div className="lesson-card__skillcheck">
-          {skillCheckDone ? (
-            <span className="lesson-card__skillcheck-score">
-              Skill check:{' '}
-              {latestSkillCheck
-                ? `${latestSkillCheck.score} / ${latestSkillCheck.total}`
-                : 'Complete'}
+      <div className="lesson-card__skillcheck">
+        {skillCheckDone && masteryStatus ? (
+          <>
+            <span
+              className={`lesson-card__mastery lesson-card__mastery--${masteryStatus}`}
+            >
+              <span aria-hidden="true">{MASTERY_PRESENTATION[masteryStatus].badge}</span>
+              {MASTERY_PRESENTATION[masteryStatus].label}
             </span>
-          ) : (
-            <span className="lesson-card__skillcheck-score lesson-card__skillcheck-score--pending">
-              Skill check not taken yet
-            </span>
-          )}
-        </div>
-      )}
+            {bestSkillCheck && (
+              <span className="lesson-card__skillcheck-score">
+                Best: {bestSkillCheck.score} / {bestSkillCheck.total}
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="lesson-card__skillcheck-score lesson-card__skillcheck-score--pending">
+            Skill check not taken yet
+          </span>
+        )}
+      </div>
 
       <div className="lesson-card__actions">
-        <Link to={`/lesson/${lesson.lessonId}`} className="button button--primary lesson-card__cta">
-          {ctaLabel}
-        </Link>
-        {lessonComplete && (
-          <Link
-            to={`/skill-check/${lesson.lessonId}`}
-            className="button button--secondary lesson-card__cta"
-          >
-            {skillCheckDone ? 'Retake skill check' : 'Take skill check'}
+        {!skillCheckDone || !masteryStatus ? (
+          <>
+            {reviewLessonLink}
+            <Link to={skillCheckHref} className="button button--primary lesson-card__cta">
+              Take skill check
+            </Link>
+          </>
+        ) : masteryStatus === 'mastered' ? (
+          <Link to={lessonHref} className="button button--primary lesson-card__cta">
+            Review lesson
           </Link>
+        ) : masteryStatus === 'needs_review' && retakePending ? (
+          <>
+            {reviewLessonLink}
+            <Link to={skillCheckHref} className="button button--primary lesson-card__cta">
+              Retake Skill Check
+            </Link>
+          </>
+        ) : (
+          <>
+            {reviewLessonLink}
+            <Link to={skillCheckHref} className="button button--primary lesson-card__cta">
+              Improve Mastery
+            </Link>
+          </>
         )}
       </div>
     </article>
