@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { onAuthStateChanged, type User } from 'firebase/auth'
 import { auth } from '../firebase'
-import { signInWithGoogle, signOut } from '../services/authService'
+import {
+  createAccountWithEmail,
+  signInWithEmail,
+  signInWithGoogle,
+  signOut,
+} from '../services/authService'
 import { ensureUserDocument, getUserProfile } from '../services/userService'
 import type { UserProfile } from '../types/user'
 import { AuthContext } from './auth-context'
@@ -39,6 +44,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await signInWithGoogle()
   }, [])
 
+  const handleSignInWithEmail = useCallback(async (email: string, password: string) => {
+    await signInWithEmail(email, password)
+  }, [])
+
+  const handleCreateAccountWithEmail = useCallback(async (email: string, password: string) => {
+    await createAccountWithEmail(email, password)
+  }, [])
+
   const handleSignOut = useCallback(async () => {
     await signOut()
   }, [])
@@ -60,10 +73,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       profile,
       loading,
       signInWithGoogle: handleSignInWithGoogle,
+      signInWithEmail: handleSignInWithEmail,
+      createAccountWithEmail: handleCreateAccountWithEmail,
       signOut: handleSignOut,
       refreshProfile: handleRefreshProfile,
     }),
-    [user, profile, loading, handleSignInWithGoogle, handleSignOut, handleRefreshProfile],
+    [
+      user,
+      profile,
+      loading,
+      handleSignInWithGoogle,
+      handleSignInWithEmail,
+      handleCreateAccountWithEmail,
+      handleSignOut,
+      handleRefreshProfile,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,5 +1,7 @@
 import {
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
@@ -21,6 +23,23 @@ function getAuthErrorMessage(code: string): string {
       return 'Network error. Please check your connection and try again.'
     case 'auth/too-many-requests':
       return 'Too many attempts. Please try again later.'
+    // Email/password sign-in and account creation.
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.'
+    case 'auth/missing-password':
+      return 'Please enter your password.'
+    // Modern Firebase returns invalid-credential for wrong email or password (it avoids
+    // revealing which one is wrong); older SDKs used wrong-password / user-not-found.
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Incorrect email or password.'
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters.'
+    case 'auth/email-already-in-use':
+      return 'An account already exists for this email. Try signing in instead.'
+    case 'auth/operation-not-allowed':
+      return 'Email/password sign-in is not enabled for this app.'
     default:
       return 'Something went wrong. Please try again.'
   }
@@ -42,6 +61,24 @@ function toAuthError(error: unknown): Error {
 export async function signInWithGoogle(): Promise<User> {
   try {
     const credential = await signInWithPopup(auth, googleProvider)
+    return credential.user
+  } catch (error) {
+    throw toAuthError(error)
+  }
+}
+
+export async function signInWithEmail(email: string, password: string): Promise<User> {
+  try {
+    const credential = await signInWithEmailAndPassword(auth, email, password)
+    return credential.user
+  } catch (error) {
+    throw toAuthError(error)
+  }
+}
+
+export async function createAccountWithEmail(email: string, password: string): Promise<User> {
+  try {
+    const credential = await createUserWithEmailAndPassword(auth, email, password)
     return credential.user
   } catch (error) {
     throw toAuthError(error)

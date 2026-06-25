@@ -5,10 +5,12 @@ import { MemoryRouter } from 'react-router-dom'
 import { LoginForm } from './LoginForm'
 
 const signInWithGoogle = vi.fn()
+const signInWithEmail = vi.fn()
+const createAccountWithEmail = vi.fn()
 
 // useAuth requires an AuthProvider in real use; mock the hook so the form can render alone.
 vi.mock('../../hooks/useAuth', () => ({
-  useAuth: () => ({ signInWithGoogle }),
+  useAuth: () => ({ signInWithGoogle, signInWithEmail, createAccountWithEmail }),
 }))
 
 function renderLoginForm() {
