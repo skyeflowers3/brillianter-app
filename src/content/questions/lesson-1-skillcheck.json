@@ -7,42 +7,42 @@
       "id": "l1-sc-1",
       "type": "drawVector",
       "isSkillCheck": true,
-      "prompt": "Draw a vector with magnitude 4 and direction 0° (pointing right along the x-axis).",
+      "prompt": "Draw the vector ⟨−3, 2⟩.",
       "correctAnswer": {
         "type": "drawVector",
-        "target": [4, 0],
+        "target": [-3, 2],
         "tolerance": 0.35
       },
-      "hint": "Direction 0° points straight right. Keep y = 0 and move 4 units along the positive x-axis.",
-      "explanation": "Magnitude 4 at 0° lands the tip at ⟨4, 0⟩: 4 units right and 0 units up. The first number tells you the horizontal movement and the second the vertical movement, so a vector pointing straight right has a y-component of 0.",
+      "hint": "The first number is the horizontal move and the second is the vertical move. ⟨−3, 2⟩ means 3 left and 2 up.",
+      "explanation": "⟨−3, 2⟩ moves 3 units left (negative horizontal) and 2 units up, so the tip lands at (−3, 2). The first number controls left/right movement and the second controls up/down.",
       "order": 1
     },
     {
       "id": "l1-sc-2",
-      "type": "drawVector",
+      "type": "readVector",
       "isSkillCheck": true,
-      "prompt": "Draw a vector with magnitude 3 and direction 270° (pointing straight down).",
+      "prompt": "A vector is shown. What vector is it?",
       "correctAnswer": {
-        "type": "drawVector",
-        "target": [0, -3],
+        "type": "readVector",
+        "vector": [2, -3],
         "tolerance": 0.35
       },
-      "hint": "Direction 270° points straight down. Keep x = 0 and move 3 units along the negative y-axis.",
-      "explanation": "Magnitude 3 at 270° lands the tip at ⟨0, −3⟩: 0 units horizontally and 3 units down. Pointing straight down means there is no left/right movement (x = 0) and the vertical component is negative.",
+      "hint": "Follow the arrow from the origin. Count how far it moves right or left, then how far up or down.",
+      "explanation": "The arrow moves 2 units right and 3 units down from the origin, so it is the vector ⟨2, −3⟩. A downward move makes the second number negative.",
       "order": 2
     },
     {
       "id": "l1-sc-3",
       "type": "drawVector",
       "isSkillCheck": true,
-      "prompt": "Draw a vector with magnitude 2√2 (about 2.8) and direction 225° (down and to the left).",
+      "prompt": "Draw a vector with magnitude 4 and direction 90°.",
       "correctAnswer": {
         "type": "drawVector",
-        "target": [-2, -2],
+        "target": [0, 4],
         "tolerance": 0.35
       },
-      "hint": "At 225° the horizontal and vertical parts are equal, and both point in the negative direction. A magnitude of 2√2 splits into 2 left and 2 down.",
-      "explanation": "At 225° the tip moves equally left and down, so the components are equal and both negative. Magnitude 2√2 gives ⟨−2, −2⟩, since √((−2)² + (−2)²) = √8 = 2√2.",
+      "hint": "Direction 90° points straight up. A magnitude of 4 means the arrow is 4 units long, so move 4 units up.",
+      "explanation": "90° points straight up, and magnitude 4 means a length of 4. So the vector is ⟨0, 4⟩: 0 horizontal and 4 up. Direction tells you which way it points and magnitude tells you how long it is.",
       "order": 3
     }
   ]

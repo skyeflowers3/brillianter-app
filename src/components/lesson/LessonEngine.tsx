@@ -7,11 +7,15 @@ import {
   restoreQuestionState,
 } from '../../lib/questionState'
 import {
+  getFindMagnitudeIncorrectMessage,
   getHeadToTailAddIncorrectMessage,
   getHeadToTailAddIncorrectReason,
   getIncompleteStepMessage,
+  getLinearComboIncorrectMessage,
+  getConstructComboIncorrectMessage,
   getMultipleChoiceIncorrectMessage,
   getNegateIncorrectMessage,
+  getReadVectorIncorrectMessage,
   getScalarIncorrectMessage,
   getSubtractIncorrectMessage,
   getVectorAdditionIncorrectMessage,
@@ -412,7 +416,11 @@ export function LessonEngine({
         getScalarIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
         getMultipleChoiceIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
         getNegateIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
-        getSubtractIncorrectMessage(currentQuestion, lastSubmittedState, locked)
+        getSubtractIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
+        getLinearComboIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
+        getConstructComboIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
+        getReadVectorIncorrectMessage(currentQuestion, lastSubmittedState, locked) ??
+        getFindMagnitudeIncorrectMessage(currentQuestion, lastSubmittedState, locked)
       )
     }
 

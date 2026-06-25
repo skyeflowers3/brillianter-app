@@ -52,6 +52,7 @@ function ExplorerPlane({ explorer, points, disabled }: ExplorerPlaneProps) {
     bounds: { min, max },
     onDrag: handleHeadDrag,
     enabled: !disabled,
+    value: scaled,
   })
 
   return (

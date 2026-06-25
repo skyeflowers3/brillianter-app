@@ -5,76 +5,95 @@
   "intro": {
     "title": "What Is a Vector?",
     "paragraphs": [
-      "A vector is an arrow with both a magnitude (length) and a direction.",
-      "The vector ⟨0, 2⟩ points 2 units up."
+      "A vector describes movement.",
+      "The vector ⟨3, 2⟩ means:",
+      "Move 3 units right.",
+      "Move 2 units up.",
+      "Vectors help us describe movement on a coordinate plane."
     ],
-    "sampleVector": [0, 2],
-    "sampleVectorLabel": "⟨0, 2⟩"
+    "sampleMovement": [3, 2]
   },
+  "interstitials": [
+    {
+      "id": "l1-after-q3",
+      "afterQuestionId": "l1-q3",
+      "heading": "Direction and Magnitude",
+      "segments": [
+        { "type": "text", "value": "Every vector has a direction and magnitude (length)." },
+        { "type": "text", "value": "For example, ⟨0, 2⟩ points straight up. Its direction is 90° and its magnitude is 2." }
+      ],
+      "figure": {
+        "vector": [0, 2],
+        "angleLabel": "90°",
+        "magnitudeLabel": "2"
+      }
+    }
+  ],
   "questions": [
     {
       "id": "l1-q1",
       "type": "drawVector",
-      "prompt": "Draw a vector with magnitude 3 and direction 0° (pointing right along the x-axis).",
+      "prompt": "Draw the vector ⟨4, 1⟩.",
       "correctAnswer": {
         "type": "drawVector",
-        "target": [3, 0],
+        "target": [4, 1],
         "tolerance": 0.35
       },
-      "hint": "Direction 0° points straight right. Keep y = 0 and move 3 units along the positive x-axis.",
-      "explanation": "Magnitude 3 at 0° lands the tip at ⟨3, 0⟩: 3 units right, 0 units up.",
+      "hint": "The first number is the horizontal move and the second is the vertical move. ⟨4, 1⟩ means 4 right and 1 up.",
+      "explanation": "⟨4, 1⟩ moves 4 units right and 1 unit up, so the tip lands at (4, 1).",
       "order": 1
     },
     {
       "id": "l1-q2",
       "type": "drawVector",
-      "prompt": "Draw a vector with magnitude 4 and direction 90° (pointing straight up).",
+      "prompt": "Draw the vector ⟨−2, 3⟩.",
       "correctAnswer": {
         "type": "drawVector",
-        "target": [0, 4],
+        "target": [-2, 3],
         "tolerance": 0.35
       },
-      "hint": "Direction 90° points straight up. Keep x = 0 and move 4 units along the positive y-axis.",
-      "explanation": "Magnitude 4 at 90° lands the tip at ⟨0, 4⟩: 0 units right, 4 units up.",
+      "hint": "A negative first number means moving left. ⟨−2, 3⟩ means 2 left and 3 up.",
+      "explanation": "⟨−2, 3⟩ moves 2 units left (negative horizontal) and 3 units up, so the tip lands at (−2, 3).",
       "order": 2
     },
     {
       "id": "l1-q3",
-      "type": "drawVector",
-      "prompt": "Draw a vector with magnitude 3 and direction 180° (pointing left).",
+      "type": "readVector",
+      "prompt": "What vector is shown?",
       "correctAnswer": {
-        "type": "drawVector",
-        "target": [-3, 0],
+        "type": "readVector",
+        "vector": [-3, 2],
         "tolerance": 0.35
       },
-      "hint": "Direction 180° points straight left. Keep y = 0 and move 3 units along the negative x-axis.",
-      "explanation": "Magnitude 3 at 180° lands the tip at ⟨−3, 0⟩: 3 units left, 0 units up.",
+      "hint": "Follow the arrow from the origin. Count how far it moves left or right, then how far up or down.",
+      "explanation": "The arrow moves 3 units left and 2 units up from the origin, so it is the vector ⟨−3, 2⟩.",
       "order": 3
     },
     {
       "id": "l1-q4",
       "type": "drawVector",
-      "prompt": "Draw a vector with magnitude 2√2 (about 2.8) and direction 45° (up and to the right).",
+      "prompt": "Draw a vector with magnitude 5 and direction 270°.",
       "correctAnswer": {
         "type": "drawVector",
-        "target": [2, 2],
+        "target": [0, -5],
         "tolerance": 0.35
       },
-      "hint": "At 45° the horizontal and vertical parts are equal. A magnitude of 2√2 splits into 2 right and 2 up.",
-      "explanation": "At 45° the components are equal. Magnitude 2√2 gives ⟨2, 2⟩, since √(2² + 2²) = √8 = 2√2.",
+      "hint": "Direction 270° points straight down. A magnitude of 5 means the arrow is 5 units long, so move 5 units down.",
+      "explanation": "270° points straight down, and magnitude 5 means a length of 5. So the vector is ⟨0, −5⟩: 0 horizontal and 5 down.",
       "order": 4
     },
     {
       "id": "l1-q5",
-      "type": "drawVector",
-      "prompt": "Draw a vector with magnitude 3√2 (about 4.2) and direction 135° (up and to the left).",
+      "type": "findMagnitude",
+      "prompt": "What is the magnitude of ⟨3, 4⟩?",
       "correctAnswer": {
-        "type": "drawVector",
-        "target": [-3, 3],
-        "tolerance": 0.35
+        "type": "findMagnitude",
+        "vector": [3, 4],
+        "magnitude": 5,
+        "tolerance": 0.25
       },
-      "hint": "135° points up and to the left, with equal horizontal and vertical parts. Magnitude 3√2 splits into 3 left and 3 up.",
-      "explanation": "At 135° the tip moves equally left and up. Magnitude 3√2 gives ⟨−3, 3⟩, since √((−3)² + 3²) = √18 = 3√2.",
+      "hint": "The vector is the long side of a right triangle. Its legs are 3 (across) and 4 (up). How long is the slanted side?",
+      "explanation": "⟨3, 4⟩ forms a right triangle with legs 3 and 4. The vector is the hypotenuse of a 3-4-5 triangle, so its magnitude is 5.",
       "order": 5
     }
   ]

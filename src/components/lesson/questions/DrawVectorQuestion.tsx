@@ -34,6 +34,7 @@ export function DrawVectorQuestion({ tip, onTipChange, disabled = false }: DrawV
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleDrag,
     enabled: !disabled,
+    value: tip,
   })
 
   const setSvgRef = useCallback(

@@ -1,10 +1,14 @@
 import type {
+  FindMagnitudeQuestion,
+  ReadVectorQuestion,
   HeadToTailAddQuestion,
   HeadToTailConnectQuestion,
   HeadToTailDrawSumQuestion,
   HeadToTailFullQuestion,
   HeadToTailFreeQuestion,
   NegateVectorQuestion,
+  LinearComboQuestion,
+  ConstructComboQuestion,
   Question,
   QuestionInteractionState,
   ScalarMultiplyQuestion,
@@ -47,6 +51,56 @@ export function createMultipleChoiceState(): QuestionInteractionState {
   return {
     type: 'multipleChoice',
     selected: [],
+  }
+}
+
+export function createLinearComboState(
+  question: LinearComboQuestion,
+): QuestionInteractionState {
+  const count = question.correctAnswer.vectorB ? 2 : 1
+  return {
+    type: 'linearCombo',
+    // Start every coefficient at 1 so each base vector is visible from the outset.
+    coefficients: Array.from({ length: count }, () => 1),
+    reachableInput: null,
+    targetIndex: 0,
+  }
+}
+
+export function createConstructComboState(
+  question: ConstructComboQuestion,
+): QuestionInteractionState {
+  return {
+    type: 'constructCombo',
+    vectorA: [...question.correctAnswer.vectorA],
+    vectorB: [...question.correctAnswer.vectorB],
+    // Start both scale factors at 1 so A and B are visible at full length from the outset.
+    aScale: 1,
+    bScale: 1,
+    bTail: [0, 0],
+    resultTip: [0, 0],
+    resultInput: [0, 0],
+    coefAInput: 0,
+    coefBInput: 0,
+    reachableInput: null,
+  }
+}
+
+export function createReadVectorState(_question: ReadVectorQuestion): QuestionInteractionState {
+  void _question
+  return {
+    type: 'readVector',
+    vectorInput: [0, 0],
+  }
+}
+
+export function createFindMagnitudeState(
+  _question: FindMagnitudeQuestion,
+): QuestionInteractionState {
+  void _question
+  return {
+    type: 'findMagnitude',
+    magnitudeInput: 0,
   }
 }
 
@@ -119,7 +173,7 @@ export function createVectorSubtractState(
     type: 'vectorSubtract',
     vectorA: [...question.correctAnswer.vectorA],
     vectorB: [...question.correctAnswer.vectorB],
-    // The −B arrow starts as B (un-reversed); the learner reverses it by dragging the tip.
+    // The −B arrow starts as B (un-reversed); the learner reverses it with the "Reverse B" button.
     negDisp: [...question.correctAnswer.vectorB],
     negTail: [0, 0],
     sumTip: [0, 0],
@@ -156,12 +210,28 @@ export function createInitialQuestionState(question: Question): QuestionInteract
     return createMultipleChoiceState()
   }
 
+  if (question.type === 'readVector') {
+    return createReadVectorState(question)
+  }
+
+  if (question.type === 'findMagnitude') {
+    return createFindMagnitudeState(question)
+  }
+
   if (question.type === 'negateVector') {
     return createNegateVectorState(question)
   }
 
   if (question.type === 'vectorSubtract') {
     return createVectorSubtractState(question)
+  }
+
+  if (question.type === 'linearCombo') {
+    return createLinearComboState(question)
+  }
+
+  if (question.type === 'constructCombo') {
+    return createConstructComboState(question)
   }
 
   return {
@@ -216,6 +286,22 @@ export function restoreQuestionState(
     }
 
     return createMultipleChoiceState()
+  }
+
+  if (question.type === 'readVector') {
+    if (saved?.type === 'readVector') {
+      return { type: 'readVector', vectorInput: [...saved.vectorInput] }
+    }
+
+    return createReadVectorState(question)
+  }
+
+  if (question.type === 'findMagnitude') {
+    if (saved?.type === 'findMagnitude') {
+      return { type: 'findMagnitude', magnitudeInput: saved.magnitudeInput }
+    }
+
+    return createFindMagnitudeState(question)
   }
 
   if (question.type === 'headToTailConnect') {
@@ -305,6 +391,40 @@ export function restoreQuestionState(
     return createVectorSubtractState(question)
   }
 
+  if (question.type === 'linearCombo') {
+    const count = question.correctAnswer.vectorB ? 2 : 1
+    if (saved?.type === 'linearCombo' && saved.coefficients.length === count) {
+      return {
+        type: 'linearCombo',
+        coefficients: [...saved.coefficients],
+        reachableInput: saved.reachableInput ?? null,
+        targetIndex: saved.targetIndex ?? 0,
+      }
+    }
+
+    return createLinearComboState(question)
+  }
+
+  if (question.type === 'constructCombo') {
+    if (saved?.type === 'constructCombo') {
+      return {
+        type: 'constructCombo',
+        vectorA: [...question.correctAnswer.vectorA],
+        vectorB: [...question.correctAnswer.vectorB],
+        aScale: saved.aScale ?? 1,
+        bScale: saved.bScale ?? 1,
+        bTail: [...(saved.bTail ?? [0, 0])],
+        resultTip: [...(saved.resultTip ?? [0, 0])],
+        resultInput: [...(saved.resultInput ?? [0, 0])],
+        coefAInput: saved.coefAInput ?? 0,
+        coefBInput: saved.coefBInput ?? 0,
+        reachableInput: saved.reachableInput ?? null,
+      }
+    }
+
+    return createConstructComboState(question)
+  }
+
   if (saved?.type === 'drawVector') {
     return { type: 'drawVector', tip: [...saved.tip] }
   }
@@ -327,6 +447,14 @@ export function questionStatesEqual(
 
   if (a.type === 'drawVector' && b.type === 'drawVector') {
     return equalsWithTolerance(a.tip, b.tip, tolerance)
+  }
+
+  if (a.type === 'readVector' && b.type === 'readVector') {
+    return equalsWithTolerance(a.vectorInput, b.vectorInput, tolerance)
+  }
+
+  if (a.type === 'findMagnitude' && b.type === 'findMagnitude') {
+    return Math.abs(a.magnitudeInput - b.magnitudeInput) <= tolerance
   }
 
   if (a.type === 'headToTailAdd' && b.type === 'headToTailAdd') {
@@ -398,6 +526,28 @@ export function questionStatesEqual(
     )
   }
 
+  if (a.type === 'linearCombo' && b.type === 'linearCombo') {
+    return (
+      a.reachableInput === b.reachableInput &&
+      (a.targetIndex ?? 0) === (b.targetIndex ?? 0) &&
+      a.coefficients.length === b.coefficients.length &&
+      a.coefficients.every((value, index) => Math.abs(value - b.coefficients[index]) <= tolerance)
+    )
+  }
+
+  if (a.type === 'constructCombo' && b.type === 'constructCombo') {
+    return (
+      a.reachableInput === b.reachableInput &&
+      Math.abs(a.aScale - b.aScale) <= tolerance &&
+      Math.abs(a.bScale - b.bScale) <= tolerance &&
+      Math.abs(a.coefAInput - b.coefAInput) <= tolerance &&
+      Math.abs(a.coefBInput - b.coefBInput) <= tolerance &&
+      equalsWithTolerance(a.bTail, b.bTail, tolerance) &&
+      equalsWithTolerance(a.resultTip, b.resultTip, tolerance) &&
+      equalsWithTolerance(a.resultInput, b.resultInput, tolerance)
+    )
+  }
+
   return false
 }
 
@@ -412,6 +562,14 @@ export function getSubmitHintMessage(state: QuestionInteractionState): string {
 
   if (state.type === 'multipleChoice') {
     return 'Change your selection to submit a new answer.'
+  }
+
+  if (state.type === 'readVector') {
+    return 'Change the vector components to submit a new answer.'
+  }
+
+  if (state.type === 'findMagnitude') {
+    return 'Change the magnitude to submit a new answer.'
   }
 
   if (state.type === 'headToTailConnect') {
@@ -436,6 +594,12 @@ export function getSubmitHintMessage(state: QuestionInteractionState): string {
 
   if (state.type === 'vectorSubtract') {
     return 'Enter the A − B components to submit a new answer.'
+  }
+
+  if (state.type === 'constructCombo') {
+    return state.reachableInput !== null
+      ? 'Change your Yes/No answer to submit again.'
+      : 'Adjust the construction or your typed answer to submit again.'
   }
 
   return 'Move the vector to submit a new answer.'

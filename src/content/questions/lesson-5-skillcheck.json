@@ -1,0 +1,80 @@
+{
+  "lessonId": "lesson-5",
+  "title": "Linear Combinations",
+  "topic": "Vector Operations",
+  "questions": [
+    {
+      "id": "l5-sc-1",
+      "type": "constructCombo",
+      "mode": "construct",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "What is 2A + B? Fill in the vector’s components below — use the grid if it helps.",
+      "referenceLabel": "A = ⟨2, 1⟩, B = ⟨1, 2⟩",
+      "expressionLabel": "2A + B",
+      "coefficient": { "min": -4, "max": 4, "step": 1 },
+      "planeMin": -8,
+      "planeMax": 8,
+      "correctAnswer": {
+        "type": "constructCombo",
+        "vectorA": [2, 1],
+        "vectorB": [1, 2],
+        "coefA": 2,
+        "coefB": 1,
+        "target": [5, 4],
+        "tolerance": 0.2
+      },
+      "hint": "Scale A by 2, leave B, connect them head-to-tail.",
+      "explanation": "2A + B = ⟨4, 2⟩ + ⟨1, 2⟩ = ⟨5, 4⟩.",
+      "order": 1
+    },
+    {
+      "id": "l5-sc-2",
+      "type": "constructCombo",
+      "mode": "construct",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "What is −A + 3B? Fill in the vector’s components below — use the grid if it helps.",
+      "referenceLabel": "A = ⟨2, 1⟩, B = ⟨1, 2⟩",
+      "expressionLabel": "−A + 3B",
+      "coefficient": { "min": -4, "max": 4, "step": 1 },
+      "planeMin": -8,
+      "planeMax": 8,
+      "correctAnswer": {
+        "type": "constructCombo",
+        "vectorA": [2, 1],
+        "vectorB": [1, 2],
+        "coefA": -1,
+        "coefB": 3,
+        "target": [1, 5],
+        "tolerance": 0.2
+      },
+      "hint": "Scale A by −1 (drag its head through the origin) and scale B by 3, then connect them head-to-tail.",
+      "explanation": "−A + 3B = ⟨−2, −1⟩ + ⟨3, 6⟩ = ⟨1, 5⟩.",
+      "order": 2
+    },
+    {
+      "id": "l5-sc-3",
+      "type": "constructCombo",
+      "mode": "findScalars",
+      "isSkillCheck": true,
+      "prompt": "What scalars c and d make c·A + d·B = ⟨5, 4⟩? Fill them in below — use the grid to scale and connect if it helps.",
+      "referenceLabel": "A = ⟨2, 1⟩, B = ⟨1, 2⟩",
+      "coefficient": { "min": -4, "max": 4, "step": 1 },
+      "planeMin": -8,
+      "planeMax": 8,
+      "correctAnswer": {
+        "type": "constructCombo",
+        "vectorA": [2, 1],
+        "vectorB": [1, 2],
+        "coefA": 2,
+        "coefB": 1,
+        "target": [5, 4],
+        "tolerance": 0.2
+      },
+      "hint": "Scale A and B until the path lands on ⟨5, 4⟩. The scale factor on A is c, and the one on B is d.",
+      "explanation": "⟨5, 4⟩ = 2·⟨2, 1⟩ + 1·⟨1, 2⟩ = ⟨4, 2⟩ + ⟨1, 2⟩, so c = 2 and d = 1.",
+      "order": 3
+    }
+  ]
+}

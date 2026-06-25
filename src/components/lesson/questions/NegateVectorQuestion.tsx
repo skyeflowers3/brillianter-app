@@ -58,6 +58,7 @@ export function NegateVectorQuestion({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleTipDrag,
     enabled: !disabled,
+    value: state.tip,
   })
 
   return (

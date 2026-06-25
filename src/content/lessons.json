@@ -12,15 +12,21 @@
     "lessonOrder": 2
   },
   {
-    "lessonId": "lesson-3",
-    "title": "Scalar Multiplication",
+    "lessonId": "lesson-4",
+    "title": "Vector Subtraction",
     "topic": "Vector Operations",
     "lessonOrder": 3
   },
   {
-    "lessonId": "lesson-4",
-    "title": "Vector Subtraction",
+    "lessonId": "lesson-3",
+    "title": "Scalar Multiplication",
     "topic": "Vector Operations",
     "lessonOrder": 4
+  },
+  {
+    "lessonId": "lesson-5",
+    "title": "Linear Combinations",
+    "topic": "Vector Operations",
+    "lessonOrder": 5
   }
 ]

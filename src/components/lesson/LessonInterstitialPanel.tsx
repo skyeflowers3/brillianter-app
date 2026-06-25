@@ -1,4 +1,6 @@
 import type { LessonInterstitial } from '../../types/lesson'
+import { DirectionMagnitudeFigure } from './DirectionMagnitudeFigure'
+import { SpanFigure } from './SpanFigure'
 
 interface LessonInterstitialPanelProps {
   interstitial: LessonInterstitial
@@ -24,6 +26,16 @@ export function LessonInterstitialPanel({ interstitial, onContinue }: LessonInte
           ),
         )}
       </div>
+
+      {interstitial.figure && (
+        <DirectionMagnitudeFigure
+          vector={interstitial.figure.vector}
+          angleLabel={interstitial.figure.angleLabel}
+          magnitudeLabel={interstitial.figure.magnitudeLabel}
+        />
+      )}
+
+      {interstitial.spanFigure && <SpanFigure vectors={interstitial.spanFigure.vectors} />}
 
       <div className="lesson-actions">
         <button type="button" className="button button--primary" onClick={onContinue}>

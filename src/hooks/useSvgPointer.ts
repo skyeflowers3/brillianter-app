@@ -9,6 +9,12 @@ interface UseSvgPointerOptions {
   enabled?: boolean
   /** Share a single SVG ref across multiple pointer hooks (e.g. two independent draggables). */
   svgRef?: RefObject<SVGSVGElement | null>
+  /**
+   * Current position of the handle this hook controls (math coordinates). When provided, dragging
+   * is relative: grabbing the handle off-center keeps that offset instead of teleporting the
+   * handle to the cursor. When omitted, the handle snaps to the cursor (legacy absolute mode).
+   */
+  value?: Vec2
 }
 
 export function useSvgPointer({
@@ -17,11 +23,15 @@ export function useSvgPointer({
   onDragEnd,
   enabled = true,
   svgRef: externalSvgRef,
+  value,
 }: UseSvgPointerOptions) {
   const internalSvgRef = useRef<SVGSVGElement>(null)
   const svgRef = externalSvgRef ?? internalSvgRef
   const draggingRef = useRef(false)
   const lastPositionRef = useRef<Vec2>([0, 0])
+  // Offset (math units) between the handle's center and the cursor at grab time. Keeps relative
+  // dragging from snapping the handle to wherever the cursor first lands.
+  const grabOffsetRef = useRef<Vec2>([0, 0])
 
   const updatePosition = useCallback(
     (clientX: number, clientY: number) => {
@@ -30,8 +40,9 @@ export function useSvgPointer({
         return
       }
 
+      const pointer = clientToSvg(svg, clientX, clientY)
       const next = clampToBounds(
-        clientToSvg(svg, clientX, clientY),
+        [pointer[0] + grabOffsetRef.current[0], pointer[1] + grabOffsetRef.current[1]],
         bounds.min,
         bounds.max,
       )
@@ -49,9 +60,21 @@ export function useSvgPointer({
 
       draggingRef.current = true
       event.currentTarget.setPointerCapture(event.pointerId)
+
+      const svg = svgRef.current
+      if (value && svg) {
+        // Relative mode: remember the grab offset and leave the handle where it is (no teleport).
+        const pointer = clientToSvg(svg, event.clientX, event.clientY)
+        grabOffsetRef.current = [value[0] - pointer[0], value[1] - pointer[1]]
+        lastPositionRef.current = [...value]
+        return
+      }
+
+      // Absolute mode (legacy): snap the handle to the cursor immediately.
+      grabOffsetRef.current = [0, 0]
       updatePosition(event.clientX, event.clientY)
     },
-    [enabled, updatePosition],
+    [enabled, svgRef, updatePosition, value],
   )
 
   const handlePointerMove = useCallback(

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { CoordinatePlane } from '../../svg/CoordinatePlane'
 import { Vector } from '../../svg/Vector'
 import { useSvgPointer } from '../../../hooks/useSvgPointer'
@@ -43,17 +43,18 @@ export function HeadToTailFullQuestion({
   const sumDrawn = connected && equalsWithTolerance(state.sumTip, target, tolerance)
   const sumStarted = state.sumTip[0] !== 0 || state.sumTip[1] !== 0
 
-  const handleDrag = useCallback(
+  const handleTailDrag = useCallback(
     (position: Vec2) => {
-      const snapped = snapInteger(position)
-      // Once b is aligned (connected), it is locked — only the sum vector can move.
-      if (connected) {
-        onStateChange({ ...state, sumTip: snapped })
-      } else {
-        onStateChange({ ...state, bTail: snapped })
-      }
+      onStateChange({ ...state, bTail: snapInteger(position) })
     },
-    [connected, onStateChange, state],
+    [onStateChange, state],
+  )
+
+  const handleSumDrag = useCallback(
+    (position: Vec2) => {
+      onStateChange({ ...state, sumTip: snapInteger(position) })
+    },
+    [onStateChange, state],
   )
 
   const handleInputChange = useCallback(
@@ -63,10 +64,25 @@ export function HeadToTailFullQuestion({
     [onStateChange, state],
   )
 
-  const { svgRef, pointerHandlers } = useSvgPointer({
+  // Independent pointer hooks share one SVG ref so each handle controls only its own vector. Once b
+  // is connected its hook is disabled (b locks in place) without unmounting the captured handle
+  // mid-drag, which previously dropped pointer capture and made connecting feel glitchy.
+  const svgRef = useRef<SVGSVGElement>(null)
+
+  const tailPointer = useSvgPointer({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
-    onDrag: handleDrag,
-    enabled: !disabled,
+    onDrag: handleTailDrag,
+    enabled: !disabled && !connected,
+    svgRef,
+    value: state.bTail,
+  })
+
+  const sumPointer = useSvgPointer({
+    bounds: { min: DRAG_MIN, max: DRAG_MAX },
+    onDrag: handleSumDrag,
+    enabled: !disabled && connected,
+    svgRef,
+    value: state.sumTip,
   })
 
   const [tailX, tailY] = mathToSvg(state.bTail)
@@ -77,45 +93,47 @@ export function HeadToTailFullQuestion({
         <Vector tip={vectorA} color="var(--lesson-vector-a)" label="a" dashed />
         <Vector origin={state.bTail} tip={vectorB} color="var(--lesson-vector-b)" label="b" />
 
-        {connected && (
-          <Vector
-            tip={state.sumTip}
-            color="var(--lesson-vector-sum)"
-            label={sumStarted ? 'a + b' : undefined}
-            draggable={!disabled}
-            onHandlePointerDown={pointerHandlers.onPointerDown}
-            onHandlePointerMove={pointerHandlers.onPointerMove}
-            onHandlePointerUp={pointerHandlers.onPointerUp}
-            onHandlePointerCancel={pointerHandlers.onPointerCancel}
-          />
-        )}
-
-        {!disabled && !connected && (
+        {/* The b-tail handle stays mounted after connecting (its hook just disables) so an in-flight
+            drag never loses pointer capture. Once connected it is hidden and click-through. */}
+        {!disabled && (
           <>
             <circle
               cx={tailX}
               cy={tailY}
               r={0.3}
               className="vector__handle"
-              style={{ fill: 'var(--lesson-vector-b)' }}
-              pointerEvents="all"
-              onPointerDown={pointerHandlers.onPointerDown}
-              onPointerMove={pointerHandlers.onPointerMove}
-              onPointerUp={pointerHandlers.onPointerUp}
-              onPointerCancel={pointerHandlers.onPointerCancel}
+              style={{ fill: 'var(--lesson-vector-b)', opacity: connected ? 0 : 1 }}
+              pointerEvents={connected ? 'none' : 'all'}
+              onPointerDown={tailPointer.pointerHandlers.onPointerDown}
+              onPointerMove={tailPointer.pointerHandlers.onPointerMove}
+              onPointerUp={tailPointer.pointerHandlers.onPointerUp}
+              onPointerCancel={tailPointer.pointerHandlers.onPointerCancel}
             />
             <circle
               cx={tailX}
               cy={tailY}
               r={0.5}
               className="vector__hit-target"
-              pointerEvents="all"
-              onPointerDown={pointerHandlers.onPointerDown}
-              onPointerMove={pointerHandlers.onPointerMove}
-              onPointerUp={pointerHandlers.onPointerUp}
-              onPointerCancel={pointerHandlers.onPointerCancel}
+              pointerEvents={connected ? 'none' : 'all'}
+              onPointerDown={tailPointer.pointerHandlers.onPointerDown}
+              onPointerMove={tailPointer.pointerHandlers.onPointerMove}
+              onPointerUp={tailPointer.pointerHandlers.onPointerUp}
+              onPointerCancel={tailPointer.pointerHandlers.onPointerCancel}
             />
           </>
+        )}
+
+        {connected && (
+          <Vector
+            tip={state.sumTip}
+            color="var(--lesson-vector-sum)"
+            label={sumStarted ? 'a + b' : undefined}
+            draggable={!disabled}
+            onHandlePointerDown={sumPointer.pointerHandlers.onPointerDown}
+            onHandlePointerMove={sumPointer.pointerHandlers.onPointerMove}
+            onHandlePointerUp={sumPointer.pointerHandlers.onPointerUp}
+            onHandlePointerCancel={sumPointer.pointerHandlers.onPointerCancel}
+          />
         )}
       </CoordinatePlane>
 

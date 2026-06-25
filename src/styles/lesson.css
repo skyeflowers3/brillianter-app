@@ -17,7 +17,9 @@
 }
 
 .lesson-intro {
-  max-width: 640px;
+  /* Match .lesson-engine so the intro's left edge lines up with the questions for a smooth
+     intro → Q1 transition. */
+  max-width: 760px;
   margin: 0 auto;
   text-align: left;
 }
@@ -30,6 +32,7 @@
 .lesson-intro__body p {
   margin: 0 0 12px;
   line-height: 1.6;
+  color: var(--text-h);
 }
 
 .lesson-intro__figure {
@@ -474,6 +477,80 @@
   color: var(--lesson-vector-sum);
 }
 
+.vector-subtract-question__reverse {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.vector-subtract-question__reverse-btn {
+  align-self: flex-start;
+}
+
+/* --- Subtraction intro animation --- */
+.subtraction-intro__stage {
+  animation: subtraction-stage-fade 0.45s ease;
+}
+
+@keyframes subtraction-stage-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.subtraction-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 20px 0 24px;
+}
+
+.subtraction-intro__caption {
+  /* Reserve a fixed height so the grid below never shifts as the caption text changes. */
+  min-height: 1.6em;
+  margin: 0 0 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.subtraction-intro__grid {
+  width: 100%;
+  max-width: 448px;
+  margin: 0;
+}
+
+.combination-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 20px 0 24px;
+}
+
+.combination-intro__caption {
+  /* Reserve a fixed height so the grid below never shifts as the caption text changes. */
+  min-height: 1.6em;
+  margin: 0 0 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.combination-intro__grid {
+  width: 100%;
+  max-width: 448px;
+  margin: 0;
+}
+
+.combination-intro__stage {
+  animation: subtraction-stage-fade 0.45s ease;
+}
+
 .scalar-multiply-question {
   margin-bottom: 20px;
 }
@@ -558,6 +635,86 @@
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--lesson-vector-a);
+}
+
+/* --- Read-a-vector & find-magnitude questions (Lesson 1) --- */
+.read-vector-question__answer,
+.find-magnitude-question__answer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.read-vector-question__label {
+  font-weight: 600;
+}
+
+.read-vector-question__help,
+.find-magnitude-question__help {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.find-magnitude__leg {
+  stroke: var(--lesson-target, #6b7280);
+  stroke-width: 0.08;
+  stroke-dasharray: 0.25 0.2;
+  fill: none;
+}
+
+.find-magnitude__leg-label {
+  fill: var(--lesson-target, #6b7280);
+  font-size: 0.5px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+}
+
+/* --- Intro "movement" animation --- */
+.movement-path {
+  stroke: var(--lesson-vector-sum, #16a34a);
+  stroke-width: 0.13;
+  stroke-linecap: round;
+  fill: none;
+  animation: movement-draw 0.8s ease forwards;
+}
+
+.movement-path--v {
+  animation-delay: 0.8s;
+}
+
+@keyframes movement-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.movement-label {
+  fill: var(--lesson-vector-sum, #16a34a);
+  font-size: 0.45px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+}
+
+/* --- Direction & magnitude teaching figure --- */
+.figure-angle-arc {
+  stroke: var(--lesson-target, #6b7280);
+  stroke-width: 0.08;
+  fill: none;
+}
+
+.figure-angle-label {
+  fill: var(--lesson-target, #6b7280);
+  font-size: 0.5px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
+}
+
+.figure-magnitude-label {
+  fill: var(--lesson-vector-a);
+  font-size: 0.5px;
+  font-weight: 700;
+  font-family: system-ui, sans-serif;
 }
 
 .scalar-multiply-question__reference,
@@ -786,4 +943,206 @@
   .lesson-actions .button {
     width: 100%;
   }
+}
+
+/* --- Span / linear-combination question --- */
+.linear-combo-question__reference {
+  margin: 0 0 12px;
+  font-family: ui-monospace, monospace;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--lesson-vector-a);
+}
+
+.linear-combo-question__status {
+  margin: 12px 0 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.linear-combo-question__status.is-success {
+  color: var(--lesson-vector-sum);
+}
+
+.linear-combo__verdict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 4px;
+}
+
+.linear-combo__verdict-btn {
+  flex: 1 1 200px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.linear-combo__verdict-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.linear-combo__verdict-btn.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.linear-combo__verdict-btn:disabled {
+  cursor: default;
+}
+
+/* SVG markers */
+.linear-combo__target-ring {
+  fill: none;
+  stroke: var(--lesson-target, #f59e0b);
+  stroke-width: 0.08;
+  stroke-dasharray: 0.22 0.18;
+}
+
+.linear-combo__target-dot {
+  fill: var(--lesson-target, #f59e0b);
+}
+
+.linear-combo__target-label {
+  fill: var(--lesson-target, #f59e0b);
+  font-size: 0.7px;
+  font-weight: 700;
+}
+
+.linear-combo__endpoint {
+  fill: var(--lesson-vector-sum);
+  stroke: var(--bg);
+  stroke-width: 0.06;
+  transition: fill 0.15s;
+}
+
+.linear-combo__endpoint.is-on-target {
+  fill: var(--success, #22c55e);
+}
+
+/* The combined corner cA + dB of the scaled-vector parallelogram */
+.linear-combo__corner-dot {
+  fill: var(--lesson-vector-sum, #6366f1);
+  stroke: var(--bg);
+  stroke-width: 0.09;
+  transition: fill 0.15s;
+}
+
+.linear-combo__corner-dot.is-on-target {
+  fill: var(--success, #22c55e);
+}
+
+.linear-combo__corner-label {
+  fill: var(--lesson-vector-sum, #6366f1);
+  font-size: 0.58px;
+  font-weight: 700;
+}
+
+/* The parallelogram spanned by the two scaled vectors */
+.linear-combo__parallelogram-fill {
+  fill: var(--lesson-vector-sum, #6366f1);
+  opacity: 0.12;
+  stroke: none;
+}
+
+.linear-combo__parallelogram-edge {
+  stroke: var(--lesson-vector-sum, #6366f1);
+  stroke-width: 0.06;
+  stroke-dasharray: 0.22 0.18;
+  opacity: 0.7;
+}
+
+/* Reachable-region overlays */
+.linear-combo__region-line {
+  stroke: var(--lesson-vector-a, #38bdf8);
+  stroke-width: 0.14;
+  stroke-linecap: round;
+  opacity: 0.4;
+}
+
+.linear-combo__region-plane {
+  fill: var(--lesson-vector-sum, #6366f1);
+  opacity: 0.08;
+}
+
+/* --- Construct linear-combination question --- */
+.construct-combo-question__status {
+  margin: 12px 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--lesson-vector-sum);
+}
+
+.construct-combo-question__readout {
+  margin: 12px 0 0;
+  font-family: ui-monospace, monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.construct-combo-question__equation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 12px 0 8px;
+  font-family: ui-monospace, monospace;
+}
+
+.construct-combo-question__expression {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--lesson-vector-sum);
+}
+
+.construct-combo-question__coef {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.construct-combo__result-line {
+  stroke: var(--lesson-vector-sum, #6366f1);
+  stroke-width: 0.08;
+  stroke-dasharray: 0.2 0.18;
+  opacity: 0.7;
+}
+
+.construct-combo__combo-dot {
+  fill: var(--lesson-vector-sum, #6366f1);
+  stroke: var(--bg);
+  stroke-width: 0.09;
+  transition: fill 0.15s;
+}
+
+.construct-combo__combo-dot.is-on-target {
+  fill: var(--success, #22c55e);
+}
+
+/* --- Span interstitial figure --- */
+.span-figure {
+  width: 100%;
+  max-width: 448px;
+  margin: 16px 0 0;
+}
+
+.span-figure__line {
+  stroke: var(--lesson-vector-a);
+  stroke-width: 0.12;
+  opacity: 0.45;
+  stroke-linecap: round;
+}
+
+.span-figure__sample {
+  fill: var(--lesson-vector-a);
+  opacity: 0.55;
 }

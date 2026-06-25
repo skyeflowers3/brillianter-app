@@ -4,10 +4,12 @@ import lesson1 from '../content/questions/lesson-1.json'
 import lesson2 from '../content/questions/lesson-2.json'
 import lesson3 from '../content/questions/lesson-3.json'
 import lesson4 from '../content/questions/lesson-4.json'
+import lesson5 from '../content/questions/lesson-5.json'
 import lesson1SkillCheck from '../content/questions/lesson-1-skillcheck.json'
 import lesson2SkillCheck from '../content/questions/lesson-2-skillcheck.json'
 import lesson3SkillCheck from '../content/questions/lesson-3-skillcheck.json'
 import lesson4SkillCheck from '../content/questions/lesson-4-skillcheck.json'
+import lesson5SkillCheck from '../content/questions/lesson-5-skillcheck.json'
 import { fetchLessons } from './lessonService'
 import type { LessonContent, Question } from '../types/lesson'
 
@@ -16,6 +18,7 @@ const localQuestions: Record<string, Question[]> = {
   'lesson-2': (lesson2 as LessonContent).questions,
   'lesson-3': (lesson3 as LessonContent).questions,
   'lesson-4': (lesson4 as LessonContent).questions,
+  'lesson-5': (lesson5 as unknown as LessonContent).questions,
 }
 
 const localIntros: Record<string, LessonContent['intro']> = {
@@ -23,6 +26,7 @@ const localIntros: Record<string, LessonContent['intro']> = {
   'lesson-2': (lesson2 as LessonContent).intro,
   'lesson-3': (lesson3 as LessonContent).intro,
   'lesson-4': (lesson4 as LessonContent).intro,
+  'lesson-5': (lesson5 as unknown as LessonContent).intro,
 }
 
 const localInterstitials: Record<string, LessonContent['interstitials']> = {
@@ -30,6 +34,7 @@ const localInterstitials: Record<string, LessonContent['interstitials']> = {
   'lesson-2': (lesson2 as LessonContent).interstitials,
   'lesson-3': (lesson3 as LessonContent).interstitials,
   'lesson-4': (lesson4 as LessonContent).interstitials,
+  'lesson-5': (lesson5 as unknown as LessonContent).interstitials,
 }
 
 // Skill-check JSON questions carry an extra `isSkillCheck` flag that widens TS's inferred JSON
@@ -39,6 +44,7 @@ const localSkillChecks: Record<string, LessonContent> = {
   'lesson-2': lesson2SkillCheck as unknown as LessonContent,
   'lesson-3': lesson3SkillCheck as unknown as LessonContent,
   'lesson-4': lesson4SkillCheck as unknown as LessonContent,
+  'lesson-5': lesson5SkillCheck as unknown as LessonContent,
 }
 
 function getLocalIntro(lessonId: string): LessonContent['intro'] {

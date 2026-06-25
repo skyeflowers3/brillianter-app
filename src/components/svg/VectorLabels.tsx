@@ -1,4 +1,12 @@
-import { useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import {
   computeLabelLayout,
   LayoutContext,
@@ -64,13 +72,28 @@ export function VectorLabelProvider({
 
 export function VectorLabelLayer() {
   const layout = useContext(LayoutContext)
+  // Last painted label boxes, used as hysteresis input so labels don't flicker between slots.
+  const previousRef = useRef<Map<string, { x: number; y: number; w: number; h: number }>>(new Map())
 
   const placed = useMemo(() => {
     if (!layout) {
       return []
     }
-    return computeLabelLayout([...layout.entries.values()], layout.min, layout.max)
+    return computeLabelLayout(
+      [...layout.entries.values()],
+      layout.min,
+      layout.max,
+      previousRef.current,
+    )
   }, [layout])
+
+  useEffect(() => {
+    const next = new Map<string, { x: number; y: number; w: number; h: number }>()
+    for (const { id, box } of placed) {
+      next.set(id, box)
+    }
+    previousRef.current = next
+  }, [placed])
 
   if (placed.length === 0) {
     return null

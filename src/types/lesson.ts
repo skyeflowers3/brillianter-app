@@ -2,6 +2,8 @@ import type { Vec2 } from '../lib/vectorMath'
 
 export type QuestionType =
   | 'drawVector'
+  | 'readVector'
+  | 'findMagnitude'
   | 'headToTailAdd'
   | 'headToTailConnect'
   | 'headToTailDrawSum'
@@ -11,6 +13,8 @@ export type QuestionType =
   | 'multipleChoice'
   | 'negateVector'
   | 'vectorSubtract'
+  | 'linearCombo'
+  | 'constructCombo'
 
 export type HeadToTailStep = 'drawA' | 'drawB' | 'drawSum'
 
@@ -23,6 +27,22 @@ export interface DrawVectorAnswer {
   type: 'drawVector'
   target?: Vec2
   magnitude?: number
+  tolerance: number
+}
+
+export interface ReadVectorAnswer {
+  type: 'readVector'
+  /** The vector drawn on the graph; the learner types these components. */
+  vector: Vec2
+  tolerance: number
+}
+
+export interface FindMagnitudeAnswer {
+  type: 'findMagnitude'
+  /** The vector drawn on the graph (with its right triangle). */
+  vector: Vec2
+  /** The magnitude the learner must type. */
+  magnitude: number
   tolerance: number
 }
 
@@ -108,8 +128,68 @@ export interface VectorSubtractAnswer {
   tolerance: number
 }
 
+/**
+ * A span / linear-combination question. The learner scales one or two base vectors with sliders to
+ * reach a highlighted target point, or judges whether the target is reachable at all.
+ */
+export type LinearComboMode = 'reach' | 'reachable'
+
+export interface LinearComboCoefficientConfig {
+  min: number
+  max: number
+  step: number
+}
+
+export interface LinearComboAnswer {
+  type: 'linearCombo'
+  /**
+   * Base vectors the learner scales. `vectorB` is omitted for single-vector questions. Stored as two
+   * flat fields (rather than a nested `Vec2[]`) so the question seeds cleanly to Firestore, which
+   * does not allow arrays of arrays.
+   */
+  vectorA: Vec2
+  vectorB?: Vec2
+  /** Highlighted target point. */
+  target: Vec2
+  /**
+   * Optional follow-up targets for 'reach' questions. After the learner lands on `target`, the next
+   * target appears, and so on. Stored as flat fields (not a `Vec2[]`) for Firestore compatibility.
+   */
+  target2?: Vec2
+  target3?: Vec2
+  /** Coefficients that reach the target (for hints/explanations); omitted when unreachable. */
+  solution?: number[]
+  /** Whether the target can be reached — used by 'reachable' mode. */
+  reachable: boolean
+  tolerance: number
+}
+
+/**
+ * 'construct' = build a prescribed cA + dB and read off the result;
+ * 'findScalars' = reach a given point, then enter the scalars c and d that produce it;
+ * 'recognize' = decide yes/no whether a target is any combination of A and B.
+ */
+export type ConstructComboMode = 'construct' | 'findScalars' | 'recognize'
+
+export interface ConstructComboAnswer {
+  type: 'constructCombo'
+  /** The two base vectors the learner scales and connects head-to-tail. */
+  vectorA: Vec2
+  vectorB: Vec2
+  /** Target coefficients (construct mode) — also the solution for a reachable recognize target. */
+  coefA: number
+  coefB: number
+  /** Highlighted target point. In construct mode this equals coefA·A + coefB·B. */
+  target: Vec2
+  /** recognize mode: whether the target is actually a linear combination of A and B. */
+  reachable?: boolean
+  tolerance: number
+}
+
 export type QuestionAnswer =
   | DrawVectorAnswer
+  | ReadVectorAnswer
+  | FindMagnitudeAnswer
   | HeadToTailAddAnswer
   | HeadToTailConnectAnswer
   | HeadToTailDrawSumAnswer
@@ -119,12 +199,34 @@ export type QuestionAnswer =
   | MultipleChoiceAnswer
   | NegateVectorAnswer
   | VectorSubtractAnswer
+  | LinearComboAnswer
+  | ConstructComboAnswer
 
 export interface DrawVectorQuestion {
   id: string
   type: 'drawVector'
   prompt: string
   correctAnswer: DrawVectorAnswer
+  hint: string
+  explanation: string
+  order: number
+}
+
+export interface ReadVectorQuestion {
+  id: string
+  type: 'readVector'
+  prompt: string
+  correctAnswer: ReadVectorAnswer
+  hint: string
+  explanation: string
+  order: number
+}
+
+export interface FindMagnitudeQuestion {
+  id: string
+  type: 'findMagnitude'
+  prompt: string
+  correctAnswer: FindMagnitudeAnswer
   hint: string
   explanation: string
   order: number
@@ -151,6 +253,17 @@ export interface ScalarMultiplyQuestion {
   /** Optional reference vector shown above the plane (e.g. A = ⟨2, 1⟩). */
   referenceLabel?: string
   slider?: ScalarSliderConfig
+  /** Optional plane bounds (default -8..8); widen for large targets like ⟨−9, −6⟩. */
+  planeMin?: number
+  planeMax?: number
+  /** Manual nudge for the "A" label, in grid units (x right, y up). Defaults to [0, 1.2]. */
+  labelOffset?: Vec2
+  /**
+   * When false, the typed answer is available immediately and the learner can submit with just an
+   * answer (no need to land the drag first). Defaults to gated (true) for the guided early
+   * questions. Correctness still checks both the graph and the typed answer.
+   */
+  gated?: boolean
   correctAnswer: ScalarMultiplyAnswer
   hint: string
   explanation: string
@@ -257,8 +370,65 @@ export interface VectorSubtractQuestion {
   order: number
 }
 
+export interface LinearComboQuestion {
+  id: string
+  type: 'linearCombo'
+  /** 'reach' = adjust coefficients to land on the target; 'reachable' = answer yes/no. */
+  mode: LinearComboMode
+  /**
+   * How the learner scales the vector. 'slider' (default) shows a range slider per coefficient;
+   * 'drag' lets them grab the head of the vector and drag it (single-vector questions only).
+   */
+  control?: 'slider' | 'drag'
+  /**
+   * Optional reachable-region overlay: 'line' highlights the span line through the origin (for
+   * parallel vectors), 'plane' shades the whole plane (for independent vectors).
+   */
+  region?: 'line' | 'plane'
+  prompt: string
+  /** Optional reference vectors shown above the plane (e.g. A = ⟨1, 0⟩, B = ⟨0, 1⟩). */
+  referenceLabel?: string
+  /** Slider range shared by every coefficient (default -4..4 step 0.5). */
+  coefficient?: LinearComboCoefficientConfig
+  /** Optional plane bounds (default -6..6). */
+  planeMin?: number
+  planeMax?: number
+  correctAnswer: LinearComboAnswer
+  hint: string
+  explanation: string
+  order: number
+}
+
+export interface ConstructComboQuestion {
+  id: string
+  type: 'constructCombo'
+  /** 'construct' = build the prescribed cA + dB; 'recognize' = decide if the target is reachable. */
+  mode: ConstructComboMode
+  /**
+   * When true (guided), each construction step (scale A → scale B → connect → draw) must be
+   * complete before submitting. When false (independent), only the typed answer is graded.
+   */
+  gated?: boolean
+  prompt: string
+  /** Optional reference vectors shown above the plane (e.g. A = ⟨2, 1⟩, B = ⟨1, 2⟩). */
+  referenceLabel?: string
+  /** The expression being built, shown on the equation row (e.g. "2A + B"). */
+  expressionLabel?: string
+  /** Drag range for each scale factor (default -4..4 step 0.5). */
+  coefficient?: LinearComboCoefficientConfig
+  /** Optional plane bounds (default -8..8). */
+  planeMin?: number
+  planeMax?: number
+  correctAnswer: ConstructComboAnswer
+  hint: string
+  explanation: string
+  order: number
+}
+
 export type Question =
   | DrawVectorQuestion
+  | ReadVectorQuestion
+  | FindMagnitudeQuestion
   | HeadToTailAddQuestion
   | HeadToTailConnectQuestion
   | HeadToTailDrawSumQuestion
@@ -268,6 +438,8 @@ export type Question =
   | MultipleChoiceQuestion
   | NegateVectorQuestion
   | VectorSubtractQuestion
+  | LinearComboQuestion
+  | ConstructComboQuestion
 
 export interface LessonIntro {
   title: string
@@ -275,6 +447,8 @@ export interface LessonIntro {
   /** Optional example vector rendered on a coordinate plane. */
   sampleVector?: Vec2
   sampleVectorLabel?: string
+  /** Optional animated "movement" example: the right-then-up path from the origin to this point. */
+  sampleMovement?: Vec2
   /** Optional head-to-tail addition example (A, B, and A + B). */
   sampleHeadToTail?: {
     vectorA: Vec2
@@ -285,6 +459,13 @@ export interface LessonIntro {
     vectorA: Vec2
     vectorB: Vec2
   }
+  /** Optional linear-combination example, animated as scale → leave → connect → draw cA + dB. */
+  sampleCombination?: {
+    vectorA: Vec2
+    vectorB: Vec2
+    coefA: number
+    coefB: number
+  }
 }
 
 export interface LessonInterstitialSegment {
@@ -293,12 +474,29 @@ export interface LessonInterstitialSegment {
   value: string
 }
 
+/** Optional vector diagram on an interstitial page, with optional angle/magnitude labels. */
+export interface LessonInterstitialFigure {
+  vector: Vec2
+  angleLabel?: string
+  magnitudeLabel?: string
+}
+
+/**
+ * Optional "span" diagram: one or more vectors plus the line of all reachable points through the
+ * origin. With two parallel vectors it visually shows they share a single line.
+ */
+export interface LessonInterstitialSpanFigure {
+  vectors: Vec2[]
+}
+
 export interface LessonInterstitial {
   id: string
   /** The interstitial appears after the user finishes the question with this id. */
   afterQuestionId: string
   heading?: string
   segments: LessonInterstitialSegment[]
+  figure?: LessonInterstitialFigure
+  spanFigure?: LessonInterstitialSpanFigure
 }
 
 export interface LessonContent {
@@ -313,6 +511,18 @@ export interface LessonContent {
 export interface DrawVectorState {
   type: 'drawVector'
   tip: Vec2
+}
+
+export interface ReadVectorState {
+  type: 'readVector'
+  /** Learner-typed components of the vector shown on the graph. */
+  vectorInput: Vec2
+}
+
+export interface FindMagnitudeState {
+  type: 'findMagnitude'
+  /** Learner-typed magnitude of the vector shown on the graph. */
+  magnitudeInput: number
 }
 
 export interface HeadToTailAddState {
@@ -414,8 +624,42 @@ export interface VectorSubtractState {
   sumInput: Vec2
 }
 
+export interface LinearComboState {
+  type: 'linearCombo'
+  /** Current coefficient values, one per base vector. */
+  coefficients: number[]
+  /** Yes/No answer for 'reachable' mode (null until chosen). */
+  reachableInput: 'yes' | 'no' | null
+  /** Which target in the sequence is currently active (for multi-target 'reach' questions). */
+  targetIndex?: number
+}
+
+export interface ConstructComboState {
+  type: 'constructCombo'
+  vectorA: Vec2
+  vectorB: Vec2
+  /** Current scale factor on A — set by dragging A's head along A's line. */
+  aScale: number
+  /** Current scale factor on B — set by dragging B's head along B's line. */
+  bScale: number
+  /** Tail of the scaled B arrow — dragged to the head of scaled A to connect head-to-tail. */
+  bTail: Vec2
+  /** Drawn result vector tip (construct mode draw step). */
+  resultTip: Vec2
+  /** Typed result coordinates (construct mode) — this is what's graded. */
+  resultInput: Vec2
+  /** Typed scalar c (findScalars mode). */
+  coefAInput: number
+  /** Typed scalar d (findScalars mode). */
+  coefBInput: number
+  /** Yes/No verdict (recognize mode). */
+  reachableInput: 'yes' | 'no' | null
+}
+
 export type QuestionInteractionState =
   | DrawVectorState
+  | ReadVectorState
+  | FindMagnitudeState
   | HeadToTailAddState
   | HeadToTailConnectState
   | HeadToTailDrawSumState
@@ -425,5 +669,7 @@ export type QuestionInteractionState =
   | MultipleChoiceState
   | NegateVectorState
   | VectorSubtractState
+  | LinearComboState
+  | ConstructComboState
 
 export type LessonPhase = 'exploring' | 'correct' | 'incorrect'

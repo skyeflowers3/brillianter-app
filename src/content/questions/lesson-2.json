@@ -15,8 +15,8 @@
   },
   "interstitials": [
     {
-      "id": "l2-after-q3",
-      "afterQuestionId": "l2-q3",
+      "id": "l2-after-q1",
+      "afterQuestionId": "l2-q1",
       "heading": "Notice that:",
       "segments": [
         { "type": "math", "value": "A = ⟨3, 0⟩" },
@@ -34,48 +34,20 @@
   "questions": [
     {
       "id": "l2-q1",
-      "type": "headToTailConnect",
-      "prompt": "Here a = ⟨−1, 0⟩ and b = ⟨0, 3⟩. Drag vector b so its tail meets the head of vector a (head-to-tail), then enter where the path a + b ends.",
+      "type": "headToTailFull",
+      "prompt": "Here a = ⟨3, 0⟩ and b = ⟨0, 3⟩ both start at the origin. Align them head-to-tail, draw a + b, then enter what a + b is.",
       "correctAnswer": {
-        "type": "headToTailConnect",
-        "vectorA": [-1, 0],
+        "type": "headToTailFull",
+        "vectorA": [3, 0],
         "vectorB": [0, 3],
         "tolerance": 0.35
       },
-      "hint": "Look at the a + b vector from the origin to where the path ends. Count how far it goes right or left (the first number) and how far up or down (the second number).",
-      "explanation": "To add vectors, we connect them head-to-tail. Start by following vector a, then continue along vector b. The path ends at ⟨−1, 0⟩ + ⟨0, 3⟩ = ⟨−1, 3⟩, which is a + b.",
+      "hint": "Once aligned, look only at the a + b arrow. From the origin, count how far it goes right or left (the first number) and how far up or down (the second number).",
+      "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨3, 0⟩ + ⟨0, 3⟩ = ⟨3 + 0, 0 + 3⟩ = ⟨3, 3⟩.",
       "order": 1
     },
     {
       "id": "l2-q2",
-      "type": "headToTailDrawSum",
-      "prompt": "Here a = ⟨3, 0⟩ and b = ⟨0, 4⟩ are already connected head-to-tail. Draw a + b from the origin to the end of the path, then enter what a + b is.",
-      "correctAnswer": {
-        "type": "headToTailDrawSum",
-        "vectorA": [3, 0],
-        "vectorB": [0, 4],
-        "tolerance": 0.35
-      },
-      "hint": "Look only at the a + b arrow. From the origin, count how far it goes right or left (the first number) and how far up or down (the second number).",
-      "explanation": "a + b is the arrow from the start of the path to its end. ⟨3, 0⟩ + ⟨0, 4⟩ = ⟨3 + 0, 0 + 4⟩ = ⟨3, 4⟩.",
-      "order": 2
-    },
-    {
-      "id": "l2-q3",
-      "type": "headToTailFull",
-      "prompt": "Here a = ⟨0, 3⟩ and b = ⟨3, 0⟩ both start at the origin. Align them head-to-tail, draw a + b, then enter what a + b is.",
-      "correctAnswer": {
-        "type": "headToTailFull",
-        "vectorA": [0, 3],
-        "vectorB": [3, 0],
-        "tolerance": 0.35
-      },
-      "hint": "Once aligned, look only at the a + b arrow. From the origin, count how far it goes right or left (the first number) and how far up or down (the second number).",
-      "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨0, 3⟩ + ⟨3, 0⟩ = ⟨0 + 3, 3 + 0⟩ = ⟨3, 3⟩.",
-      "order": 3
-    },
-    {
-      "id": "l2-q4",
       "type": "headToTailFull",
       "prompt": "Here a = ⟨1, −2⟩ and b = ⟨2, 3⟩ both start at the origin. Align them head-to-tail, draw a + b, then enter what a + b is.",
       "correctAnswer": {
@@ -86,24 +58,24 @@
       },
       "hint": "Once aligned, look only at the a + b arrow. From the origin, count how far it goes right or left (the first number) and how far up or down (the second number).",
       "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨1, −2⟩ + ⟨2, 3⟩ = ⟨1 + 2, −2 + 3⟩ = ⟨3, 1⟩.",
-      "order": 4
+      "order": 2
     },
     {
-      "id": "l2-q5",
-      "type": "headToTailFree",
-      "prompt": "Now try it on your own! Here a = ⟨−2, 1⟩ and b = ⟨3, 2⟩. Move the vectors to find the path, then enter what a + b is.",
+      "id": "l2-q3",
+      "type": "headToTailFull",
+      "prompt": "Here a = ⟨−2, 1⟩ and b = ⟨3, 2⟩ both start at the origin. Align them head-to-tail, draw a + b, then enter what a + b is.",
       "correctAnswer": {
-        "type": "headToTailFree",
+        "type": "headToTailFull",
         "vectorA": [-2, 1],
         "vectorB": [3, 2],
         "tolerance": 0.35
       },
-      "hint": "Look at the a + b arrow from the origin: count how far it goes right or left (the first number) and how far up or down (the second number).",
+      "hint": "Once aligned, look only at the a + b arrow. From the origin, count how far it goes right or left (the first number) and how far up or down (the second number).",
       "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨−2, 1⟩ + ⟨3, 2⟩ = ⟨−2 + 3, 1 + 2⟩ = ⟨1, 3⟩.",
-      "order": 5
+      "order": 3
     },
     {
-      "id": "l2-q6",
+      "id": "l2-q4",
       "type": "headToTailFree",
       "prompt": "Now try it on your own! Here a = ⟨3, −1⟩ and b = ⟨−1, 3⟩. Move the vectors to find the path, then enter what a + b is.",
       "correctAnswer": {
@@ -114,6 +86,34 @@
       },
       "hint": "Look at the a + b arrow from the origin: count how far it goes right or left (the first number) and how far up or down (the second number).",
       "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨3, −1⟩ + ⟨−1, 3⟩ = ⟨3 + (−1), −1 + 3⟩ = ⟨2, 2⟩.",
+      "order": 4
+    },
+    {
+      "id": "l2-q5",
+      "type": "headToTailFree",
+      "prompt": "Now try it on your own! Here a = ⟨2, 2⟩ and b = ⟨−3, 1⟩. Move the vectors to find the path, then enter what a + b is.",
+      "correctAnswer": {
+        "type": "headToTailFree",
+        "vectorA": [2, 2],
+        "vectorB": [-3, 1],
+        "tolerance": 0.35
+      },
+      "hint": "Look at the a + b arrow from the origin: count how far it goes right or left (the first number) and how far up or down (the second number).",
+      "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨2, 2⟩ + ⟨−3, 1⟩ = ⟨2 + (−3), 2 + 1⟩ = ⟨−1, 3⟩.",
+      "order": 5
+    },
+    {
+      "id": "l2-q6",
+      "type": "headToTailFree",
+      "prompt": "Now try it on your own! Here a = ⟨−1, −2⟩ and b = ⟨3, 3⟩. Move the vectors to find the path, then enter what a + b is.",
+      "correctAnswer": {
+        "type": "headToTailFree",
+        "vectorA": [-1, -2],
+        "vectorB": [3, 3],
+        "tolerance": 0.35
+      },
+      "hint": "Look at the a + b arrow from the origin: count how far it goes right or left (the first number) and how far up or down (the second number).",
+      "explanation": "Connect a and b head-to-tail, then a + b is the arrow from the start to the end of the path. ⟨−1, −2⟩ + ⟨3, 3⟩ = ⟨−1 + 3, −2 + 3⟩ = ⟨2, 1⟩.",
       "order": 6
     }
   ]

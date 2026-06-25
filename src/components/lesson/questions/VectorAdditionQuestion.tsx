@@ -54,6 +54,7 @@ export function VectorAdditionQuestion({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: syncSumTip,
     enabled: !disabled,
+    value: state.sumTip,
   })
 
   const handleInputChange = useCallback(

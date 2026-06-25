@@ -16,8 +16,8 @@ import { ColumnVector } from './ColumnVector'
 import { ScalarValueInput } from './ScalarValueInput'
 import { VectorComponentInput } from './VectorComponentInput'
 
-const PLANE_MIN = -8
-const PLANE_MAX = 8
+const DEFAULT_PLANE_MIN = -8
+const DEFAULT_PLANE_MAX = 8
 
 interface ScalarMultiplyQuestionProps {
   question: ScalarMultiplyQuestion
@@ -32,12 +32,17 @@ export function ScalarMultiplyQuestion({
   onStateChange,
   disabled = false,
 }: ScalarMultiplyQuestionProps) {
+  const planeMin = question.planeMin ?? DEFAULT_PLANE_MIN
+  const planeMax = question.planeMax ?? DEFAULT_PLANE_MAX
   const baseVector = presetBaseVector(question)
   const sliderConfig = getSliderConfig(question)
   const scaled = scaledVector(baseVector, state.scalar)
   const answer = question.correctAnswer
   const isFindScalar = question.mode === 'findScalar'
   const sliderCorrect = Math.abs(state.scalar - answer.scalar) <= answer.tolerance
+  // Guided questions reveal the answer only after the drag lands; ungated ones show it immediately.
+  const guided = question.gated !== false
+  const showAnswer = guided ? sliderCorrect : true
 
   // Show the live scalar while building a vector, but hide it when the learner must deduce c.
   const scalarLabel = isFindScalar ? 'c = ?' : `c = ${formatScalar(state.scalar)}`
@@ -66,9 +71,10 @@ export function ScalarMultiplyQuestion({
   )
 
   const { svgRef, pointerHandlers } = useSvgPointer({
-    bounds: { min: PLANE_MIN, max: PLANE_MAX },
+    bounds: { min: planeMin, max: planeMax },
     onDrag: handleHeadDrag,
     enabled: !disabled,
+    value: scaled,
   })
 
   return (
@@ -76,8 +82,14 @@ export function ScalarMultiplyQuestion({
       {question.referenceLabel && (
         <p className="scalar-multiply-question__reference">{question.referenceLabel}</p>
       )}
-      <CoordinatePlane ref={svgRef} min={PLANE_MIN} max={PLANE_MAX}>
-        <Vector tip={baseVector} color="var(--lesson-vector-a)" label="A" labelOffset={[0, 1.2]} dashed />
+      <CoordinatePlane ref={svgRef} min={planeMin} max={planeMax}>
+        <Vector
+          tip={baseVector}
+          color="var(--lesson-vector-a)"
+          label="A"
+          labelOffset={question.labelOffset ?? [0, 1.2]}
+          dashed
+        />
         <Vector
           tip={scaled}
           color="var(--lesson-vector-sum)"
@@ -90,12 +102,18 @@ export function ScalarMultiplyQuestion({
         />
       </CoordinatePlane>
 
-      {sliderCorrect ? (
+      {showAnswer ? (
         <>
           <p className="scalar-multiply-question__status">
-            {isFindScalar
-              ? 'c · A matches the target! Now, what is the scalar c?'
-              : "You've scaled A. Now, what is the resulting vector?"}
+            {/* Only guided questions reveal that the graph step is done. Ungated questions stay
+                neutral so the learner gets no hint about correctness before submitting. */}
+            {guided && sliderCorrect
+              ? isFindScalar
+                ? 'c · A matches the target! Now, what is the scalar c?'
+                : "You've scaled A. Now, what is the resulting vector?"
+              : isFindScalar
+                ? 'Enter the scalar c — and line up c · A with the target on the graph.'
+                : 'Enter the resulting vector — and scale A to match on the graph.'}
           </p>
           {isFindScalar ? (
             <div className="scalar-multiply-question__answer">

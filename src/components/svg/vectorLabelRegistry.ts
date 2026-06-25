@@ -71,6 +71,11 @@ const ENDPOINT_RADIUS = 0.45 // keep clear of arrowheads / handles / endpoints
 const BOUND_PAD = 0.15
 const GAP = 0.05
 
+// Axis-number geometry (matches .coordinate-plane__grid-number font-size and Grid.tsx placement).
+const AXIS_NUMBER_FONT = 0.4
+const AXIS_NUMBER_CHAR = 0.24
+const AXIS_NUMBER_PAD = 0.07
+
 interface Box {
   x: number
   y: number
@@ -168,10 +173,39 @@ export interface PlacedLabel {
   box: Box
 }
 
+/**
+ * Build obstacles for the x/y axes and their printed numbers (SVG coords, y-down). Labels may sit on
+ * faint grid lines but must stay clear of the bold axes and the number ticks so they read cleanly.
+ */
+function axisObstacles(min: number, max: number): { segments: Segment[]; boxes: Box[] } {
+  // x-axis lives at SVG y=0; y-axis at SVG x=0 (the math origin maps to SVG origin).
+  const segments: Segment[] = [
+    { a: [min, 0], b: [max, 0] },
+    { a: [0, -max], b: [0, -min] },
+  ]
+
+  const boxes: Box[] = []
+  for (let value = Math.ceil(min); value <= Math.floor(max); value += 1) {
+    if (value === 0 || value === min || value === max) {
+      continue
+    }
+    const text = String(value)
+    const w = text.length * AXIS_NUMBER_CHAR + AXIS_NUMBER_PAD * 2
+    const h = AXIS_NUMBER_FONT + AXIS_NUMBER_PAD * 2
+    // x-axis number: centered at x=value, drawn just below the axis (text baseline at SVG y≈0.5).
+    boxes.push({ x: value - w / 2, y: 0.5 - h, w, h })
+    // y-axis number: right-aligned at SVG x=-0.25, vertically centered on SVG y=-value.
+    boxes.push({ x: -0.25 - w, y: -value - h / 2, w, h })
+  }
+
+  return { segments, boxes }
+}
+
 export function computeLabelLayout(
   entries: VectorLabelEntry[],
   min: number,
   max: number,
+  previous?: Map<string, Box>,
 ): PlacedLabel[] {
   const endpoints: [number, number][] = []
   const segments: Segment[] = []
@@ -179,6 +213,8 @@ export function computeLabelLayout(
     endpoints.push(entry.origin, entry.end)
     segments.push({ a: entry.origin, b: entry.end })
   }
+
+  const { segments: axisSegments, boxes: axisNumberBoxes } = axisObstacles(min, max)
 
   const placedBoxes: Box[] = []
   const results: PlacedLabel[] = []
@@ -201,6 +237,45 @@ export function computeLabelLayout(
       perpY = dx / len
     }
 
+    // Score a candidate box; 0 means it touches nothing but (allowed) grid lines.
+    const conflictScore = (box: Box): number => {
+      let score = 0
+      for (const other of placedBoxes) {
+        if (boxesOverlap(box, other)) score += 4
+      }
+      // Axes and their numbers are hard obstacles — labels must never sit on them.
+      for (const seg of axisSegments) {
+        if (segmentHitsBox(seg, box)) score += 4
+      }
+      for (const numberBox of axisNumberBoxes) {
+        if (boxesOverlap(box, numberBox)) score += 4
+      }
+      for (const seg of segments) {
+        if (segmentHitsBox(seg, box)) score += 2
+      }
+      for (const point of endpoints) {
+        if (boxesOverlap(box, pointBox(point))) score += 1
+      }
+      return score
+    }
+
+    // Hysteresis: keep last frame's slot if it is still fully clear and hasn't drifted far from
+    // the (possibly moved) vector. This stops labels flickering between equally-good slots while
+    // a vector is being dragged. A drift cap lets the label follow when its vector moves away.
+    const prev = previous?.get(entry.id)
+    if (prev) {
+      const expectedW = entry.text.length * CHAR_WIDTH + PAD_X * 2
+      const prevCenterX = prev.x + prev.w / 2
+      const prevCenterY = prev.y + prev.h / 2
+      const drift = Math.hypot(prevCenterX - midX, prevCenterY - midY)
+      const maxDrift = 0.25 * len + 1.3
+      if (Math.abs(prev.w - expectedW) < 1e-6 && drift <= maxDrift && conflictScore(prev) === 0) {
+        placedBoxes.push(prev)
+        results.push({ id: entry.id, text: entry.text, color: entry.color, box: prev })
+        continue
+      }
+    }
+
     // Candidate centers: midpoint pushed perpendicular both ways at growing distances,
     // plus spots biased toward the tip and the tail, so a clear slot can be found.
     const anchors: [number, number][] = [
@@ -215,21 +290,6 @@ export function computeLabelLayout(
         candidates.push([ax + perpX * dist, ay + perpY * dist])
         candidates.push([ax - perpX * dist, ay - perpY * dist])
       }
-    }
-
-    // Score each candidate; 0 means it touches nothing but (allowed) grid lines.
-    const conflictScore = (box: Box): number => {
-      let score = 0
-      for (const other of placedBoxes) {
-        if (boxesOverlap(box, other)) score += 4
-      }
-      for (const seg of segments) {
-        if (segmentHitsBox(seg, box)) score += 2
-      }
-      for (const point of endpoints) {
-        if (boxesOverlap(box, pointBox(point))) score += 1
-      }
-      return score
     }
 
     let chosen: Box | null = null

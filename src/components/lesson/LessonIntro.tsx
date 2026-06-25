@@ -1,7 +1,10 @@
 import { CoordinatePlane } from '../svg/CoordinatePlane'
 import { Vector } from '../svg/Vector'
-import { add, scale } from '../../lib/vectorMath'
+import { add } from '../../lib/vectorMath'
 import type { LessonIntro as LessonIntroContent } from '../../types/lesson'
+import { MovementFigure } from './MovementFigure'
+import { SubtractionIntroFigure } from './SubtractionIntroFigure'
+import { CombinationIntroFigure } from './CombinationIntroFigure'
 
 interface LessonIntroProps {
   intro: LessonIntroContent
@@ -16,6 +19,8 @@ export function LessonIntro({ intro, onContinue }: LessonIntroProps) {
           <p key={index}>{paragraph}</p>
         ))}
       </div>
+
+      {intro.sampleMovement && <MovementFigure destination={intro.sampleMovement} />}
 
       {intro.sampleVector && (
         <div className="lesson-intro__figure">
@@ -53,34 +58,19 @@ export function LessonIntro({ intro, onContinue }: LessonIntroProps) {
       )}
 
       {intro.sampleSubtraction && (
-        <div className="lesson-intro__figure">
-          <CoordinatePlane min={-4} max={4}>
-            <Vector
-              tip={intro.sampleSubtraction.vectorA}
-              color="var(--lesson-vector-a)"
-              label="A"
-            />
-            <Vector
-              tip={intro.sampleSubtraction.vectorB}
-              color="var(--lesson-target)"
-              label="B"
-              dashed
-            />
-            <Vector
-              tip={scale(intro.sampleSubtraction.vectorB, -1)}
-              origin={intro.sampleSubtraction.vectorA}
-              color="var(--lesson-vector-b)"
-              label="−B"
-              labelOffset={[-0.5, -1]}
-            />
-            <Vector
-              tip={add(intro.sampleSubtraction.vectorA, scale(intro.sampleSubtraction.vectorB, -1))}
-              color="var(--lesson-vector-sum)"
-              label="A − B"
-              labelOffset={[1, 0]}
-            />
-          </CoordinatePlane>
-        </div>
+        <SubtractionIntroFigure
+          vectorA={intro.sampleSubtraction.vectorA}
+          vectorB={intro.sampleSubtraction.vectorB}
+        />
+      )}
+
+      {intro.sampleCombination && (
+        <CombinationIntroFigure
+          vectorA={intro.sampleCombination.vectorA}
+          vectorB={intro.sampleCombination.vectorB}
+          coefA={intro.sampleCombination.coefA}
+          coefB={intro.sampleCombination.coefB}
+        />
       )}
 
       <div className="lesson-actions">

@@ -38,25 +38,28 @@ export function VectorSubtractQuestion({
 }: VectorSubtractQuestionProps) {
   const { vectorA, vectorB } = state
   const tolerance = question.correctAnswer.tolerance
+  const negB: Vec2 = [-vectorB[0], -vectorB[1]]
   const reversed = equalsWithTolerance(state.negDisp, scale(vectorB, -1), tolerance)
+  const connected = reversed && equalsWithTolerance(state.negTail, vectorA, tolerance)
   const negMoved = state.negTail[0] !== 0 || state.negTail[1] !== 0
   const sumStarted = state.sumTip[0] !== 0 || state.sumTip[1] !== 0
 
-  // Q2 hides the equation until B is reversed; Q3–Q5 show it from the start.
-  const showInput = question.gated ? reversed : true
+  // Guided (Q1–Q2) walks reverse → connect → draw → type. Freeform (Q3+) shows the equation right
+  // away and only grades the typed answer, so B is draggable from the start and reversing is
+  // optional.
+  const guided = question.gated
+  const showInput = guided ? reversed : true
+  const tailEnabled = !disabled && (guided ? reversed : true)
+  const sumEnabled = !disabled && (guided ? reversed : true)
+  // In guided mode, before reversing we show B as a static dashed arrow next to the Reverse button.
+  // Otherwise the B/−B arrow is the draggable one the learner connects head-to-tail.
+  const showStaticB = guided && !reversed
+  const showReverseButton = !disabled && !reversed
+  const showSum = negMoved && (!guided || reversed)
 
-  // Q2/Q3 use the A + (−B) form to reinforce "subtraction = adding the opposite".
-  const additionForm = question.additionForm ?? false
-  const negB: Vec2 = [-vectorB[0], -vectorB[1]]
-  const sumName = additionForm ? 'A + (−B)' : 'A − B'
-
-  const handleReverseDrag = useCallback(
-    (position: Vec2) => {
-      // While reversing, the −B arrow's tail stays at the origin, so the tip is its displacement.
-      onStateChange({ ...state, negDisp: snapInteger(position) })
-    },
-    [onStateChange, state],
-  )
+  const handleReverse = useCallback(() => {
+    onStateChange({ ...state, negDisp: negB })
+  }, [negB, onStateChange, state])
 
   const handleTailDrag = useCallback(
     (position: Vec2) => {
@@ -82,60 +85,57 @@ export function VectorSubtractQuestion({
   // Independent pointer hooks share one SVG ref so each handle only moves when it is grabbed.
   const svgRef = useRef<SVGSVGElement>(null)
 
-  const reversePointer = useSvgPointer({
-    bounds: { min: DRAG_MIN, max: DRAG_MAX },
-    onDrag: handleReverseDrag,
-    enabled: !disabled && !reversed,
-    svgRef,
-  })
-
   const tailPointer = useSvgPointer({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleTailDrag,
-    enabled: !disabled && reversed,
+    enabled: tailEnabled,
     svgRef,
+    value: state.negTail,
   })
 
   const sumPointer = useSvgPointer({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleSumDrag,
-    enabled: !disabled && reversed,
+    enabled: sumEnabled,
     svgRef,
+    value: state.sumTip,
   })
 
   const [tailX, tailY] = mathToSvg(state.negTail)
 
   return (
     <div className="vector-subtract-question">
-      {question.referenceLabel && (
-        <p className="question-reference">{question.referenceLabel}</p>
-      )}
+      {question.referenceLabel && <p className="question-reference">{question.referenceLabel}</p>}
+
       <CoordinatePlane ref={svgRef} min={PLANE_MIN} max={PLANE_MAX}>
         <Vector tip={vectorA} color="var(--lesson-vector-a)" label="A" dashed />
-        {/* Hide the original B once it has been reversed so the graph isn't cluttered. */}
-        {!reversed && <Vector tip={vectorB} color="var(--lesson-target)" label="B" dashed />}
 
-        {!reversed ? (
-          <Vector
-            origin={state.negTail}
-            tip={state.negDisp}
-            color="var(--lesson-vector-b)"
-            label="−B"
-            draggable={!disabled}
-            onHandlePointerDown={reversePointer.pointerHandlers.onPointerDown}
-            onHandlePointerMove={reversePointer.pointerHandlers.onPointerMove}
-            onHandlePointerUp={reversePointer.pointerHandlers.onPointerUp}
-            onHandlePointerCancel={reversePointer.pointerHandlers.onPointerCancel}
-          />
+        {showStaticB ? (
+          <Vector tip={vectorB} color="var(--lesson-target)" label="B" dashed />
         ) : (
           <>
-            <Vector
-              origin={state.negTail}
-              tip={state.negDisp}
-              color="var(--lesson-vector-b)"
-              label="−B"
-            />
-            {!disabled && (
+            {/* The B/−B arrow. Right after reversing it spins 180° from B's orientation to −B. */}
+            <g>
+              <Vector
+                origin={state.negTail}
+                tip={state.negDisp}
+                color="var(--lesson-vector-b)"
+                label={reversed ? '−B' : 'B'}
+              />
+              {reversed && !negMoved && !disabled && (
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from="180 0 0"
+                  to="0 0 0"
+                  dur="0.45s"
+                  repeatCount="1"
+                  fill="freeze"
+                />
+              )}
+            </g>
+
+            {tailEnabled && (
               <>
                 <circle
                   cx={tailX}
@@ -165,11 +165,11 @@ export function VectorSubtractQuestion({
           </>
         )}
 
-        {reversed && negMoved && (
+        {showSum && (
           <Vector
             tip={state.sumTip}
             color="var(--lesson-vector-sum)"
-            label={sumStarted ? sumName : undefined}
+            label={sumStarted ? 'A − B' : undefined}
             draggable={!disabled}
             onHandlePointerDown={sumPointer.pointerHandlers.onPointerDown}
             onHandlePointerMove={sumPointer.pointerHandlers.onPointerMove}
@@ -179,68 +179,58 @@ export function VectorSubtractQuestion({
         )}
       </CoordinatePlane>
 
-      {!disabled && (
-        <>
-          {question.gated && !reversed ? (
-            <p className="vector-subtract-question__help muted">
-              First reverse B: drag the tip of the −B arrow through the origin to point the opposite
-              way. Then connect it head-to-tail to A and draw {sumName}.
-            </p>
-          ) : (
-            <>
-              <p className="vector-subtract-question__status">
-                {question.gated
-                  ? `−B is ready! Now just add it: connect −B head-to-tail to A, draw ${sumName}, then enter it below.`
-                  : 'Now try it on your own!'}
-              </p>
-              <p className="vector-subtract-question__help muted">
-                {question.gated
-                  ? `No more steps are checked — just enter the correct ${sumName} below to submit.`
-                  : 'Reverse B and build the path however you like — no steps are checked. Just enter the correct A − B below to submit.'}
-              </p>
-            </>
-          )}
-        </>
+      {showReverseButton && (
+        <div className="vector-subtract-question__reverse">
+          <button
+            type="button"
+            className="button button--primary vector-subtract-question__reverse-btn"
+            onClick={handleReverse}
+          >
+            Reverse B
+          </button>
+          <p className="vector-subtract-question__help muted">
+            {guided
+              ? 'Step 1: reverse B. Click the button to flip B around the origin and turn it into −B.'
+              : 'Reverse B flips it into −B so you can add it to A.'}
+          </p>
+        </div>
       )}
 
-      {showInput &&
-        (additionForm ? (
-          <div className="vector-subtract-question__equation">
-            <ColumnVector value={vectorA} color="var(--lesson-vector-a)" label="vector A" />
-            <span className="vector-equation__op" aria-hidden="true">
-              +
-            </span>
-            <ColumnVector value={negB} color="var(--lesson-vector-b)" label="negative B" />
-            <span className="vector-equation__op" aria-hidden="true">
-              =
-            </span>
-            <VectorComponentInput
-              name="A + (−B)"
-              value={state.sumInput}
-              onChange={handleInputChange}
-              disabled={disabled}
-              color="var(--lesson-vector-sum)"
-            />
-          </div>
-        ) : (
-          <div className="vector-subtract-question__equation">
-            <ColumnVector value={vectorA} color="var(--lesson-vector-a)" label="vector A" />
-            <span className="vector-equation__op" aria-hidden="true">
-              −
-            </span>
-            <ColumnVector value={vectorB} color="var(--lesson-target)" label="vector B" />
-            <span className="vector-equation__op" aria-hidden="true">
-              =
-            </span>
-            <VectorComponentInput
-              name="A − B"
-              value={state.sumInput}
-              onChange={handleInputChange}
-              disabled={disabled}
-              color="var(--lesson-vector-sum)"
-            />
-          </div>
-        ))}
+      {!disabled && guided && reversed && (
+        <p className="vector-subtract-question__status">
+          {!connected
+            ? 'Now connect −B head-to-tail: drag its tail to the head of A.'
+            : !sumStarted
+              ? 'Now draw A − B from the origin to the end of the path.'
+              : 'Now enter A − B below.'}
+        </p>
+      )}
+
+      {!disabled && !guided && (
+        <p className="vector-subtract-question__status">
+          Work it out on the grid if it helps, then enter A − B below.
+        </p>
+      )}
+
+      {showInput && (
+        <div className="vector-subtract-question__equation">
+          <ColumnVector value={vectorA} color="var(--lesson-vector-a)" label="vector A" />
+          <span className="vector-equation__op" aria-hidden="true">
+            −
+          </span>
+          <ColumnVector value={vectorB} color="var(--lesson-target)" label="vector B" />
+          <span className="vector-equation__op" aria-hidden="true">
+            =
+          </span>
+          <VectorComponentInput
+            name="A − B"
+            value={state.sumInput}
+            onChange={handleInputChange}
+            disabled={disabled}
+            color="var(--lesson-vector-sum)"
+          />
+        </div>
+      )}
     </div>
   )
 }

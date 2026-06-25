@@ -1,9 +1,13 @@
 import type { Question, QuestionInteractionState } from '../../types/lesson'
 import { DrawVectorQuestion } from './questions/DrawVectorQuestion'
+import { FindMagnitudeQuestion } from './questions/FindMagnitudeQuestion'
+import { ReadVectorQuestion } from './questions/ReadVectorQuestion'
 import { HeadToTailConnectQuestion } from './questions/HeadToTailConnectQuestion'
 import { HeadToTailDrawSumQuestion } from './questions/HeadToTailDrawSumQuestion'
 import { HeadToTailFullQuestion } from './questions/HeadToTailFullQuestion'
 import { HeadToTailFreeQuestion } from './questions/HeadToTailFreeQuestion'
+import { LinearComboQuestion } from './questions/LinearComboQuestion'
+import { ConstructComboQuestion } from './questions/ConstructComboQuestion'
 import { MultipleChoiceQuestion } from './questions/MultipleChoiceQuestion'
 import { NegateVectorQuestion } from './questions/NegateVectorQuestion'
 import { ScalarMultiplyQuestion } from './questions/ScalarMultiplyQuestion'
@@ -28,6 +32,28 @@ export function QuestionRenderer({
       <DrawVectorQuestion
         tip={state.tip}
         onTipChange={(tip) => onStateChange({ type: 'drawVector', tip })}
+        disabled={disabled}
+      />
+    )
+  }
+
+  if (question.type === 'readVector' && state.type === 'readVector') {
+    return (
+      <ReadVectorQuestion
+        question={question}
+        state={state}
+        onStateChange={onStateChange}
+        disabled={disabled}
+      />
+    )
+  }
+
+  if (question.type === 'findMagnitude' && state.type === 'findMagnitude') {
+    return (
+      <FindMagnitudeQuestion
+        question={question}
+        state={state}
+        onStateChange={onStateChange}
         disabled={disabled}
       />
     )
@@ -124,6 +150,28 @@ export function QuestionRenderer({
   if (question.type === 'vectorSubtract' && state.type === 'vectorSubtract') {
     return (
       <VectorSubtractQuestion
+        question={question}
+        state={state}
+        onStateChange={onStateChange}
+        disabled={disabled}
+      />
+    )
+  }
+
+  if (question.type === 'linearCombo' && state.type === 'linearCombo') {
+    return (
+      <LinearComboQuestion
+        question={question}
+        state={state}
+        onStateChange={onStateChange}
+        disabled={disabled}
+      />
+    )
+  }
+
+  if (question.type === 'constructCombo' && state.type === 'constructCombo') {
+    return (
+      <ConstructComboQuestion
         question={question}
         state={state}
         onStateChange={onStateChange}

@@ -5,6 +5,9 @@ interface ScalarValueInputProps {
   onChange: (next: number) => void
   disabled?: boolean
   color?: string
+  /** Label shown before the input. Defaults to "c =". */
+  label?: string
+  ariaLabel?: string
 }
 
 function parseScalar(raw: string): number | null {
@@ -18,7 +21,14 @@ function parseScalar(raw: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-export function ScalarValueInput({ value, onChange, disabled = false, color }: ScalarValueInputProps) {
+export function ScalarValueInput({
+  value,
+  onChange,
+  disabled = false,
+  color,
+  label = 'c =',
+  ariaLabel = 'scalar c',
+}: ScalarValueInputProps) {
   const [text, setText] = useState(() => (value === 0 ? '' : String(value)))
   // Tracks the last value we emitted so we only resync the field when `value` changes for an
   // external reason (e.g. restoring a saved answer), not in response to the learner's typing.
@@ -33,14 +43,14 @@ export function ScalarValueInput({ value, onChange, disabled = false, color }: S
 
   return (
     <span className="scalar-value-input" style={color ? { color } : undefined}>
-      <span className="scalar-value-input__name">c =</span>
+      {label && <span className="scalar-value-input__name">{label}</span>}
       <input
         type="text"
         inputMode="numeric"
         className="scalar-value-input__field"
         value={text}
         disabled={disabled}
-        aria-label="scalar c"
+        aria-label={ariaLabel}
         onChange={(event) => {
           const raw = event.target.value
           setText(raw)

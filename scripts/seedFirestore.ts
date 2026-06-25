@@ -12,6 +12,7 @@ const LESSON_QUESTION_FILES: Record<string, string> = {
   'lesson-2': 'src/content/questions/lesson-2.json',
   'lesson-3': 'src/content/questions/lesson-3.json',
   'lesson-4': 'src/content/questions/lesson-4.json',
+  'lesson-5': 'src/content/questions/lesson-5.json',
 }
 
 function resolvePath(relativeOrAbsolutePath: string): string {
@@ -71,10 +72,12 @@ async function seedFirestore() {
 
     for (const question of lessonContent.questions) {
       const questionId = String(question.id)
+      // Full overwrite (no merge) so a question that changes shape — e.g. dropping a second vector
+      // or switching type — never keeps stale fields from a previous seed.
       await db
         .collection('questions')
         .doc(questionId)
-        .set({ ...question, lessonId, isSkillCheck: false }, { merge: true })
+        .set({ ...question, lessonId, isSkillCheck: false })
       console.log(`  ✓ questions/${questionId}`)
     }
   }

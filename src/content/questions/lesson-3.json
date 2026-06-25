@@ -8,7 +8,7 @@
       "afterQuestionId": "l3-q2",
       "heading": "Notice that:",
       "segments": [
-        { "type": "math", "value": "−2⟨2, 1⟩ = ⟨−2 · 2, −2 · 1⟩ = ⟨−4, −2⟩" },
+        { "type": "math", "value": "−2⟨1, 2⟩ = ⟨−2 · 1, −2 · 2⟩ = ⟨−2, −4⟩" },
         { "type": "text", "value": "To scale a vector, multiply each component by c." },
         {
           "type": "text",
@@ -40,76 +40,73 @@
       "type": "scalarSlider",
       "mode": "createVector",
       "prompt": "Drag the head of the vector to create −2A, then enter the resulting vector.",
-      "referenceLabel": "A = ⟨2, 1⟩",
+      "referenceLabel": "A = ⟨1, 2⟩",
       "slider": { "min": -4, "max": 4, "step": 0.5 },
       "correctAnswer": {
         "type": "scalarSlider",
-        "baseVector": [2, 1],
+        "baseVector": [1, 2],
         "scalar": -2,
         "tolerance": 0.1
       },
       "hint": "−2A multiplies each component by −2, which flips the direction and doubles the length. Drag the head through the origin until c = −2.",
-      "explanation": "−2 · ⟨2, 1⟩ = ⟨−2·2, −2·1⟩ = ⟨−4, −2⟩. A negative scalar reverses the direction, and |−2| = 2 doubles the length.",
+      "explanation": "−2 · ⟨1, 2⟩ = ⟨−2·1, −2·2⟩ = ⟨−2, −4⟩. A negative scalar reverses the direction, and |−2| = 2 doubles the length.",
       "order": 2
     },
     {
       "id": "l3-q3",
       "type": "scalarSlider",
       "mode": "findScalar",
-      "prompt": "Drag the head of the vector until c·A matches ⟨6, 3⟩, then enter the scalar c.",
-      "referenceLabel": "A = ⟨2, 1⟩",
+      "prompt": "Drag the head of the vector until c·A matches ⟨2, 6⟩, then enter the scalar c.",
+      "referenceLabel": "A = ⟨1, 3⟩",
       "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "gated": false,
       "correctAnswer": {
         "type": "scalarSlider",
-        "baseVector": [2, 1],
-        "scalar": 3,
+        "baseVector": [1, 3],
+        "scalar": 2,
         "tolerance": 0.1
       },
-      "hint": "Each component of ⟨6, 3⟩ is the same multiple of ⟨2, 1⟩. What number times 2 gives 6?",
-      "explanation": "c · ⟨2, 1⟩ = ⟨6, 3⟩ means 2c = 6 and 1c = 3, so c = 3.",
+      "hint": "Each component of ⟨2, 6⟩ is the same multiple of ⟨1, 3⟩. What number times 1 gives 2?",
+      "explanation": "c · ⟨1, 3⟩ = ⟨2, 6⟩ means 1c = 2 and 3c = 6, so c = 2.",
       "order": 3
     },
     {
       "id": "l3-q4",
       "type": "scalarSlider",
       "mode": "findScalar",
-      "prompt": "Drag the head of the vector until c·A matches ⟨−4, −2⟩, then enter the scalar c.",
-      "referenceLabel": "A = ⟨2, 1⟩",
+      "prompt": "Drag the head of the vector until c·A matches ⟨−6, 2⟩, then enter the scalar c.",
+      "referenceLabel": "A = ⟨3, −1⟩",
       "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "labelOffset": [0, 2.4],
+      "gated": false,
       "correctAnswer": {
         "type": "scalarSlider",
-        "baseVector": [2, 1],
+        "baseVector": [3, -1],
         "scalar": -2,
         "tolerance": 0.1
       },
-      "hint": "⟨−4, −2⟩ points opposite to A and is twice as long, so c must be negative.",
-      "explanation": "c · ⟨2, 1⟩ = ⟨−4, −2⟩ means 2c = −4 and 1c = −2, so c = −2.",
+      "hint": "⟨−6, 2⟩ points opposite to A and is twice as long, so c must be negative.",
+      "explanation": "c · ⟨3, −1⟩ = ⟨−6, 2⟩ means 3c = −6 and −1c = 2, so c = −2.",
       "order": 4
     },
     {
       "id": "l3-q5",
-      "type": "multipleChoice",
-      "prompt": "Which of the following could be written as cA? Select all that apply.",
-      "referenceLabel": "A = ⟨3, 2⟩",
-      "options": [
-        { "id": "o1", "label": "⟨6, 4⟩" },
-        { "id": "o2", "label": "⟨2, 3⟩" },
-        { "id": "o3", "label": "⟨−3, −2⟩" },
-        { "id": "o4", "label": "⟨9, 6⟩" },
-        { "id": "o5", "label": "⟨3, 3⟩" },
-        { "id": "o6", "label": "⟨6, 3⟩" }
-      ],
-      "explorer": {
-        "baseVector": [3, 2],
-        "min": -5,
-        "max": 10
-      },
+      "type": "scalarSlider",
+      "mode": "findScalar",
+      "prompt": "Drag the head of the vector until c·A matches the target ⟨−9, −6⟩, then enter the scalar c.",
+      "referenceLabel": "A = ⟨3, 2⟩, target = ⟨−9, −6⟩",
+      "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "planeMin": -10,
+      "planeMax": 10,
+      "gated": false,
       "correctAnswer": {
-        "type": "multipleChoice",
-        "correctOptionIds": ["o1", "o3", "o4"]
+        "type": "scalarSlider",
+        "baseVector": [3, 2],
+        "scalar": -3,
+        "tolerance": 0.1
       },
-      "hint": "A vector is cA only if BOTH components are the same multiple of A. Since A = ⟨3, 2⟩, cA = ⟨3c, 2c⟩.",
-      "explanation": "⟨3c, 2c⟩ gives ⟨6, 4⟩ (c = 2), ⟨−3, −2⟩ (c = −1), and ⟨9, 6⟩ (c = 3). The others change the ratio between the components, so they can't be written as cA.",
+      "hint": "⟨−9, −6⟩ points opposite to A, and each component is 3 times as long. What single number times ⟨3, 2⟩ gives ⟨−9, −6⟩?",
+      "explanation": "c · ⟨3, 2⟩ = ⟨−9, −6⟩ means 3c = −9 and 2c = −6, so c = −3. The negative scalar flips A's direction, and |−3| = 3 triples its length.",
       "order": 5
     }
   ]

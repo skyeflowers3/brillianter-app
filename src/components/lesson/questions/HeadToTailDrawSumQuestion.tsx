@@ -59,6 +59,7 @@ export function HeadToTailDrawSumQuestion({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleSumDrag,
     enabled: !disabled,
+    value: state.sumTip,
   })
 
   return (

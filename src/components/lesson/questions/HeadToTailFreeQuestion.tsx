@@ -69,6 +69,7 @@ export function HeadToTailFreeQuestion({
     onDrag: handleBDrag,
     enabled: !disabled,
     svgRef,
+    value: state.bTail,
   })
 
   const sumPointer = useSvgPointer({
@@ -76,6 +77,7 @@ export function HeadToTailFreeQuestion({
     onDrag: handleSumDrag,
     enabled: !disabled && bMoved,
     svgRef,
+    value: state.sumTip,
   })
 
   const [tailX, tailY] = mathToSvg(state.bTail)

@@ -58,6 +58,7 @@ export function HeadToTailConnectQuestion({
     bounds: { min: DRAG_MIN, max: DRAG_MAX },
     onDrag: handleTailDrag,
     enabled: !disabled,
+    value: state.bTail,
   })
 
   const [tailX, tailY] = mathToSvg(state.bTail)
