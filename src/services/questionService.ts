@@ -10,6 +10,18 @@ import lesson4SkillCheck from '../content/questions/lesson-4-skillcheck.json'
 import lesson5SkillCheck from '../content/questions/lesson-5-skillcheck.json'
 import { fetchLessons } from './lessonService'
 import type { LessonContent, Question } from '../types/lesson'
+import { getConceptTags } from '../content/conceptTags'
+
+/**
+ * Attach concept tags (from the central tag map) to each question so downstream code can read them
+ * off `question.conceptTags`. An authored question's own tags, if present, take precedence.
+ */
+function withConceptTags(questions: Question[]): Question[] {
+  return questions.map((question) => ({
+    ...question,
+    conceptTags: question.conceptTags ?? getConceptTags(question.id),
+  }))
+}
 
 const localQuestions: Record<string, Question[]> = {
   'lesson-1': (lesson1 as LessonContent).questions,
@@ -60,7 +72,7 @@ function getLocalQuestions(lessonId: string): Question[] {
     return []
   }
 
-  return [...questions].sort((a, b) => a.order - b.order)
+  return withConceptTags([...questions].sort((a, b) => a.order - b.order))
 }
 
 /**
@@ -109,6 +121,6 @@ export async function loadSkillCheckContent(lessonId: string): Promise<LessonCon
 
   return {
     ...content,
-    questions: [...content.questions].sort((a, b) => a.order - b.order),
+    questions: withConceptTags([...content.questions].sort((a, b) => a.order - b.order)),
   }
 }

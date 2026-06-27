@@ -8,7 +8,9 @@ import type {
  * Maps a skill-check score to a mastery tier. This is the single source of truth for the tiers, so
  * the dashboard badge, the skill-check results screen, and the celebration all agree.
  *
- * For a 3-question check: 3/3 -> Mastered, 2/3 -> Developing, 0-1/3 -> Needs Review.
+ * For a 5-question check: 5/5 -> Mastered, 4/5 -> Proficient, 0-3/5 -> Needs Review. The thresholds
+ * generalize: a perfect score is Mastered, missing at most one is Proficient, anything else is
+ * Needs Review.
  */
 export function evaluateMastery(score: number, total: number): MasteryStatus {
   if (total <= 0) {
@@ -17,8 +19,8 @@ export function evaluateMastery(score: number, total: number): MasteryStatus {
   if (score >= total) {
     return 'mastered'
   }
-  if (score / total >= 2 / 3) {
-    return 'developing'
+  if (score >= total - 1) {
+    return 'proficient'
   }
   return 'needs_review'
 }
@@ -36,6 +38,22 @@ export function getBestSkillCheck(progress: LessonProgress): SkillCheckHistoryEn
 }
 
 /**
+ * Coerce a stored mastery value to a tier the current build understands. Tolerates legacy/foreign
+ * values (e.g. the old `developing` tier, since renamed to `proficient`) so a progress doc written
+ * by a different build can never produce an unknown status that crashes a `MASTERY_PRESENTATION`
+ * lookup. Unknown values return null and fall back to deriving the tier from history.
+ */
+export function normalizeMasteryStatus(value: unknown): MasteryStatus | null {
+  if (value === 'mastered' || value === 'proficient' || value === 'needs_review') {
+    return value
+  }
+  if (value === 'developing') {
+    return 'proficient'
+  }
+  return null
+}
+
+/**
  * Mastery tier for a lesson, or null if no skill check has been taken yet. Prefers the stored
  * `masteryStatus`, falling back to deriving it from history for older progress docs.
  */
@@ -43,8 +61,9 @@ export function getMasteryStatus(progress: LessonProgress | null | undefined): M
   if (!progress) {
     return null
   }
-  if (progress.masteryStatus) {
-    return progress.masteryStatus
+  const stored = normalizeMasteryStatus(progress.masteryStatus)
+  if (stored) {
+    return stored
   }
 
   const best = getBestSkillCheck(progress)
@@ -56,7 +75,7 @@ function getAttemptCount(progress: LessonProgress): number {
 }
 
 /**
- * Whether the learner owes a required retake: they scored Needs Review (<2/3) and have not yet
+ * Whether the learner owes a required retake: they scored Needs Review (<4/5) and have not yet
  * completed a second skill-check attempt. The next lesson stays locked while this is true.
  */
 export function isRequiredRetakePending(progress: LessonProgress | null | undefined): boolean {
@@ -85,10 +104,10 @@ export const MASTERY_PRESENTATION: Record<MasteryStatus, MasteryPresentation> = 
     badge: '🏆',
     message: "Perfect score! You've mastered this.",
   },
-  developing: {
-    label: 'Developing',
+  proficient: {
+    label: 'Proficient',
     badge: '🎯',
-    message: 'Great work — you clearly know this well.',
+    message: 'Strong work — you know this well. Come back anytime to earn full mastery.',
   },
   needs_review: {
     label: 'Needs Review',

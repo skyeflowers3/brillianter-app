@@ -53,6 +53,40 @@
       "hint": "Reverse B to get −B = ⟨1, −3⟩, connect it head-to-tail to A, draw the result, then enter A − B.",
       "explanation": "A − B = A + (−B) = ⟨2, 2⟩ + ⟨1, −3⟩ = ⟨3, −1⟩.",
       "order": 3
+    },
+    {
+      "id": "l4-sc-4",
+      "type": "vectorSubtract",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "Find A − B.",
+      "referenceLabel": "A = ⟨3, −1⟩, B = ⟨−1, 2⟩",
+      "correctAnswer": {
+        "type": "vectorSubtract",
+        "vectorA": [3, -1],
+        "vectorB": [-1, 2],
+        "tolerance": 0.35
+      },
+      "hint": "Reverse B to get −B = ⟨1, −2⟩, connect it head-to-tail to A, draw the result, then enter A − B.",
+      "explanation": "A − B = A + (−B) = ⟨3, −1⟩ + ⟨1, −2⟩ = ⟨4, −3⟩.",
+      "order": 4
+    },
+    {
+      "id": "l4-sc-5",
+      "type": "vectorSubtract",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "Find A − B.",
+      "referenceLabel": "A = ⟨−2, −1⟩, B = ⟨1, 2⟩",
+      "correctAnswer": {
+        "type": "vectorSubtract",
+        "vectorA": [-2, -1],
+        "vectorB": [1, 2],
+        "tolerance": 0.35
+      },
+      "hint": "Reverse B to get −B = ⟨−1, −2⟩, connect it head-to-tail to A, draw the result, then enter A − B.",
+      "explanation": "A − B = A + (−B) = ⟨−2, −1⟩ + ⟨−1, −2⟩ = ⟨−3, −3⟩.",
+      "order": 5
     }
   ]
 }

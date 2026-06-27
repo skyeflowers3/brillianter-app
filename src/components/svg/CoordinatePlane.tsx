@@ -1,6 +1,11 @@
 import { forwardRef, type ReactNode } from 'react'
 import { Grid } from './Grid'
 import { VectorLabelLayer, VectorLabelProvider } from './VectorLabels'
+// The coordinate-plane / grid / axis styles live in lesson.css. Import them here so the plane is
+// always styled wherever it renders (lessons, skill checks, tutor diagrams, remediation). Without
+// this, visiting a skill check before any lesson loaded the route without lesson.css's chunk, so the
+// grid rendered as a blank black box.
+import '../../styles/lesson.css'
 
 interface CoordinatePlaneProps {
   children?: ReactNode

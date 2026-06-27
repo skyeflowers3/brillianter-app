@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -37,6 +38,14 @@ export async function getAllLessonProgress(userId: string): Promise<LessonProgre
   return snapshot.docs.map((entry) => entry.data() as LessonProgress)
 }
 
+/** Permanently deletes every lesson-progress document for the user (lessons + skill checks). */
+export async function deleteAllLessonProgress(userId: string): Promise<void> {
+  const progressQuery = query(collection(db, 'progress'), where('userId', '==', userId))
+  const snapshot = await getDocs(progressQuery)
+
+  await Promise.all(snapshot.docs.map((entry) => deleteDoc(entry.ref)))
+}
+
 export async function ensureLessonProgress(
   userId: string,
   lessonId: string,
@@ -56,10 +65,47 @@ export async function saveLessonProgress(progress: LessonProgress): Promise<void
   await setDoc(doc(db, 'progress', getProgressDocId(progress.userId, progress.lessonId)), progress)
 }
 
+/**
+ * Resets the lesson's question progress so it can be redone, while preserving the skill-check
+ * record and mastery — retrying the lesson questions must not erase a skill check the learner
+ * already passed (or demote their mastery).
+ */
 export async function resetLessonProgress(userId: string, lessonId: string): Promise<LessonProgress> {
-  const progress = createDefaultProgress(userId, lessonId)
+  const existing = await getLessonProgress(userId, lessonId)
+
+  const progress: LessonProgress = existing
+    ? {
+        ...existing,
+        completed: false,
+        currentQuestionIndex: 0,
+        questionsAnswered: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        questionHistory: [],
+        awaitingContinue: false,
+      }
+    : createDefaultProgress(userId, lessonId)
+
   await saveLessonProgress(progress)
   return progress
+}
+
+/**
+ * Marks the required post-Needs-Review remediation as done so the next lesson unlocks regardless of
+ * score (the learner can never get permanently stuck). Called when a personalized practice session
+ * is completed.
+ */
+export async function completeRequiredRetake(
+  userId: string,
+  lessonId: string,
+): Promise<LessonProgress> {
+  const existing = await ensureLessonProgress(userId, lessonId)
+  if (existing.requiredRetakeCompleted) {
+    return existing
+  }
+  const updated: LessonProgress = { ...existing, requiredRetakeCompleted: true }
+  await saveLessonProgress(updated)
+  return updated
 }
 
 export async function recordSkillCheckResult(

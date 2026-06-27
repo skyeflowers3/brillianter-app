@@ -6,6 +6,8 @@ import { useProgressContext } from '../hooks/useProgressContext'
 import { loadSkillCheckContent } from '../services/questionService'
 import { recordSkillCheckResult } from '../services/progressService'
 import { updateStreak } from '../services/streakService'
+import { applyConceptOutcomes, deriveOutcomesFromAnswers } from '../services/masteryProfileService'
+import { getMasteryStatus } from '../services/masteryService'
 import { randomizeSkillCheck } from '../lib/skillCheckRandomizer'
 import type { LessonContent } from '../types/lesson'
 import type { SkillCheckResult } from '../types/progress'
@@ -26,7 +28,11 @@ export function SkillCheckPage() {
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
+    // Intentional one-time latch: once content + the first progress load are done we freeze
+    // `initialized` so later background progress refreshes can't unmount/remount the engine (which
+    // would silently restart the skill check). This deliberately sets state from an effect.
     if (!initialized && lesson && !progressLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInitialized(true)
     }
   }, [initialized, lesson, progressLoading])
@@ -96,14 +102,27 @@ export function SkillCheckPage() {
 
       try {
         await recordSkillCheckResult(user.uid, lessonId, result)
+        // Fold the skill-check signals into the concept-level mastery profile so feedback, practice,
+        // and remediation all see which concepts were missed.
+        await applyConceptOutcomes(user.uid, deriveOutcomesFromAnswers(questions, result.answers))
         await updateStreak(user.uid)
         await Promise.all([refreshProgress(), refreshProfile()])
       } catch (persistError) {
         console.warn('Failed to persist skill check result', persistError)
       }
     },
-    [lessonId, refreshProfile, refreshProgress, user],
+    [lessonId, questions, refreshProfile, refreshProgress, user],
   )
+
+  // As long as the lesson is still unpassed (best score is Needs Review), Continue routes into the
+  // personalized remediation flow — so failing the skill check again sends the learner to a fresh
+  // practice. Once they've passed (Proficient/Mastered), Continue returns to the dashboard.
+  const continuesToReview =
+    !!lessonId && getMasteryStatus(getProgress(lessonId)) === 'needs_review'
+
+  const handleContinue = useCallback(() => {
+    navigate(continuesToReview ? `/remediation/${lessonId}` : '/dashboard')
+  }, [continuesToReview, lessonId, navigate])
 
   if (!lessonId) {
     return (
@@ -138,7 +157,8 @@ export function SkillCheckPage() {
       questions={questions}
       lessonTitle={lesson.title}
       onComplete={(result) => void handleComplete(result)}
-      onContinue={() => navigate('/dashboard')}
+      onContinue={handleContinue}
+      continueLabel={continuesToReview ? 'Continue to personalized review' : 'Continue'}
       onRetry={() => setAttemptKey((current) => current + 1)}
     />
   )

@@ -4,74 +4,14 @@ import sc2 from '../content/questions/lesson-2-skillcheck.json'
 import sc3 from '../content/questions/lesson-3-skillcheck.json'
 import sc4 from '../content/questions/lesson-4-skillcheck.json'
 import sc5 from '../content/questions/lesson-5-skillcheck.json'
-import type { Question, QuestionInteractionState } from '../types/lesson'
+import type { Question } from '../types/lesson'
 import { randomizeSkillCheckQuestion } from './skillCheckRandomizer'
+import { correctStateFor } from './correctState'
 import { subtractTarget, validateQuestion } from './validation'
 import { add, scale, type Vec2 } from './vectorMath'
 
 const SKILL_CHECKS = [sc1, sc2, sc3, sc4, sc5]
 const ALL_QUESTIONS = SKILL_CHECKS.flatMap((check) => check.questions) as unknown as Question[]
-
-/** Build the canonical "correct" interaction state for a generated question. */
-function correctStateFor(question: Question): QuestionInteractionState {
-  switch (question.type) {
-    case 'drawVector':
-      return { type: 'drawVector', tip: (question.correctAnswer.target ?? [0, 0]) as Vec2 }
-    case 'readVector':
-      return { type: 'readVector', vectorInput: question.correctAnswer.vector }
-    case 'headToTailFull': {
-      const { vectorA, vectorB } = question.correctAnswer
-      const sum = add(vectorA, vectorB)
-      return { type: 'headToTailFull', vectorA, vectorB, bTail: vectorA, sumTip: sum, sumInput: sum }
-    }
-    case 'headToTailFree': {
-      const { vectorA, vectorB } = question.correctAnswer
-      const sum = add(vectorA, vectorB)
-      return { type: 'headToTailFree', vectorA, vectorB, bTail: [0, 0], sumTip: [0, 0], sumInput: sum }
-    }
-    case 'scalarSlider': {
-      const { baseVector, scalar } = question.correctAnswer
-      return {
-        type: 'scalarSlider',
-        baseVector,
-        scalar,
-        vectorInput: scale(baseVector, scalar),
-        scalarInput: scalar,
-      }
-    }
-    case 'vectorSubtract': {
-      const { vectorA, vectorB } = question.correctAnswer
-      return {
-        type: 'vectorSubtract',
-        vectorA,
-        vectorB,
-        negDisp: [0, 0],
-        negTail: [0, 0],
-        sumTip: [0, 0],
-        sumInput: subtractTarget(question.correctAnswer),
-      }
-    }
-    case 'constructCombo': {
-      const a = question.correctAnswer
-      const isFindScalars = question.mode === 'findScalars'
-      return {
-        type: 'constructCombo',
-        vectorA: a.vectorA,
-        vectorB: a.vectorB,
-        aScale: 0,
-        bScale: 0,
-        bTail: [0, 0],
-        resultTip: [0, 0],
-        resultInput: isFindScalars ? [0, 0] : a.target,
-        coefAInput: isFindScalars ? a.coefA : 0,
-        coefBInput: isFindScalars ? a.coefB : 0,
-        reachableInput: null,
-      }
-    }
-    default:
-      throw new Error(`No correct state builder for ${question.type}`)
-  }
-}
 
 describe('skillCheckRandomizer', () => {
   it('produces variants that pass the real validateQuestion with a correct answer', () => {
@@ -82,8 +22,9 @@ describe('skillCheckRandomizer', () => {
       for (let i = 0; i < 40; i += 1) {
         const variant = randomizeSkillCheckQuestion(template)
         const state = correctStateFor(variant)
+        expect(state, `Expected a correct-state builder for ${variant.type}`).not.toBeNull()
         expect(
-          validateQuestion(variant, state),
+          validateQuestion(variant, state!),
           `Generated ${variant.type} (${variant.id}) should validate as correct`,
         ).toBe(true)
       }

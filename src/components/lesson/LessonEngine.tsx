@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLessonNavigation } from '../../hooks/useLessonNavigation'
+import { useTutorContext } from '../../hooks/useTutorContext'
+import { buildFeedbackRequest } from '../../lib/answerSummary'
+import { getMistakeFeedback } from '../../services/aiFeedbackService'
 import {
   createInitialQuestionState,
   getSubmitHintMessage,
@@ -33,6 +36,9 @@ import type {
   LessonPhase,
   QuestionInteractionState,
 } from '../../types/lesson'
+import type { MasteryProfile } from '../../types/masteryProfile'
+import { suggestStrategy } from '../../services/strategyAdvisor'
+import { describeCurrentProgress, describeSolutionSteps } from '../../lib/solutionGuide'
 import { ExplanationPanel } from './ExplanationPanel'
 import { FeedbackPanel } from './FeedbackPanel'
 import { HintPanel } from './HintPanel'
@@ -60,6 +66,8 @@ interface LessonEngineProps {
   initialResumeState?: LessonResumeState
   initialAnswers?: AnsweredQuestionSnapshot[]
   persistHandlers?: LessonEnginePersistHandlers
+  /** Concept-level mastery snapshot, used to surface adaptive strategy nudges. Optional. */
+  masteryProfile?: MasteryProfile | null
 }
 
 export function LessonEngine({
@@ -69,8 +77,10 @@ export function LessonEngine({
   initialResumeState,
   initialAnswers,
   persistHandlers,
+  masteryProfile,
 }: LessonEngineProps) {
   const { setLessonSession } = useLessonNavigation()
+  const { setQuestionContext } = useTutorContext()
   const questions = lesson.questions
   const initialIndex = initialResumeState?.questionIndex ?? initialQuestionIndex
   const initialQuestion = questions[initialIndex]
@@ -94,9 +104,16 @@ export function LessonEngine({
   const [showExplanation, setShowExplanation] = useState(
     initialAnswerSnapshot?.showExplanation ?? initialResumeState?.showExplanation ?? false,
   )
+  // Question id for which the learner dismissed the adaptive strategy tip, so it stays hidden for
+  // that question but can reappear on a later one where the pattern still holds.
+  const [strategyDismissedFor, setStrategyDismissedFor] = useState<string | null>(null)
   // A finished lesson opens in "review" mode (start at the beginning, all questions navigable)
   // rather than jumping to the celebration card, which only shows after finishing in-session.
   const [lessonComplete, setLessonComplete] = useState(false)
+  // Reviewing an already-completed lesson is read-only: moving through it (including reaching the
+  // end) must never write progress, so a review can't reset a finished/mastered lesson. "Retry"
+  // leaves review by resetting the lesson, after which the fresh attempt persists normally.
+  const [reviewing, setReviewing] = useState(initialCompleted)
   const [showIntro, setShowIntro] = useState(
     Boolean(lesson.intro) &&
       initialIndex === 0 &&
@@ -124,6 +141,14 @@ export function LessonEngine({
     initialAnswerSnapshot?.interactionState ?? initialResumeState?.interactionState ?? null,
   )
   const [hasMovedSinceSubmit, setHasMovedSinceSubmit] = useState(false)
+  // Personalized AI feedback for the latest wrong answer (null while loading or when unavailable).
+  // It augments the static per-type message below. A monotonic seq guards against a slow earlier
+  // request overwriting a newer one.
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null)
+  // True while the AI feedback request is in flight, so the panel can show a neutral placeholder
+  // instead of briefly flashing the static message and then swapping to the AI one.
+  const [aiFeedbackPending, setAiFeedbackPending] = useState(false)
+  const aiFeedbackSeq = useRef(0)
   // Furthest question index reached since the lesson was last (re)started.
   const [maxIndex, setMaxIndex] = useState(() => {
     // A completed lesson is fully reviewable, so every question is reachable.
@@ -163,6 +188,23 @@ export function LessonEngine({
   const currentQuestion = questions[questionIndex]
   const totalQuestions = questions.length
 
+  const strategySuggestion = useMemo(
+    () => suggestStrategy(currentQuestion, masteryProfile),
+    [currentQuestion, masteryProfile],
+  )
+
+  // What the tutor should know about how to solve THIS question and where the learner is in it.
+  // `solutionSteps` is static per question; `progressNote` re-derives from the live state but stays
+  // a stable string until the learner crosses a real step boundary, so it won't churn on every drag.
+  const solutionSteps = useMemo(
+    () => (currentQuestion ? describeSolutionSteps(currentQuestion) : undefined),
+    [currentQuestion],
+  )
+  const progressNote = useMemo(
+    () => (currentQuestion ? describeCurrentProgress(currentQuestion, questionState) : undefined),
+    [currentQuestion, questionState],
+  )
+
   useEffect(() => {
     setLessonSession({ lessonId: lesson.lessonId, isComplete: lessonComplete })
 
@@ -170,6 +212,34 @@ export function LessonEngine({
       setLessonSession({ lessonId: null, isComplete: false })
     }
   }, [lesson.lessonId, lessonComplete, setLessonSession])
+
+  // Tell the always-available tutor which question the learner is on (cleared on intro/complete/exit).
+  useEffect(() => {
+    if (!currentQuestion || lessonComplete || showIntro || activeInterstitial) {
+      setQuestionContext(null)
+      return
+    }
+    setQuestionContext({
+      lessonId: lesson.lessonId,
+      questionId: currentQuestion.id,
+      questionPrompt: currentQuestion.prompt,
+      currentAttempts: attempts,
+      solutionSteps,
+      progressNote,
+    })
+  }, [
+    activeInterstitial,
+    attempts,
+    currentQuestion,
+    lesson.lessonId,
+    lessonComplete,
+    progressNote,
+    solutionSteps,
+    setQuestionContext,
+    showIntro,
+  ])
+
+  useEffect(() => () => setQuestionContext(null), [setQuestionContext])
 
   const interactionDisabled = phase === 'correct' || (phase === 'incorrect' && attempts >= 2)
 
@@ -185,6 +255,9 @@ export function LessonEngine({
       setQuestionState(createInitialQuestionState(nextQuestion))
       setLastSubmittedState(null)
       setHasMovedSinceSubmit(false)
+      aiFeedbackSeq.current += 1
+      setAiFeedback(null)
+      setAiFeedbackPending(false)
     },
     [questions],
   )
@@ -210,6 +283,10 @@ export function LessonEngine({
     setQuestionState(snapshot.questionState)
     setLastSubmittedState(snapshot.lastSubmittedState)
     setHasMovedSinceSubmit(snapshot.hasMovedSinceSubmit)
+    // Don't carry a previous question's AI feedback into the one we navigated to.
+    aiFeedbackSeq.current += 1
+    setAiFeedback(null)
+    setAiFeedbackPending(false)
   }, [])
 
   const goToQuestion = useCallback(
@@ -256,7 +333,7 @@ export function LessonEngine({
 
   const persistQuestionResult = useCallback(
     async (wasCorrect: boolean, attemptCount: number, submittedState: QuestionInteractionState) => {
-      if (!currentQuestion || !persistHandlers) {
+      if (!currentQuestion || !persistHandlers || reviewing) {
         return
       }
 
@@ -267,7 +344,43 @@ export function LessonEngine({
         submittedState,
       })
     },
-    [currentQuestion, persistHandlers],
+    [currentQuestion, persistHandlers, reviewing],
+  )
+
+  const requestAiFeedback = useCallback(
+    (submittedState: QuestionInteractionState, attemptCount: number, hintShown: boolean) => {
+      if (!currentQuestion) {
+        return
+      }
+
+      const request = buildFeedbackRequest(currentQuestion, submittedState, attemptCount, hintShown)
+      if (!request) {
+        // No typed answer to diagnose — the static per-type message is clearer here.
+        setAiFeedback(null)
+        setAiFeedbackPending(false)
+        return
+      }
+
+      const seq = aiFeedbackSeq.current + 1
+      aiFeedbackSeq.current = seq
+      setAiFeedback(null)
+      setAiFeedbackPending(true)
+
+      void getMistakeFeedback(request)
+        .then((response) => {
+          if (aiFeedbackSeq.current === seq) {
+            setAiFeedback(response.message)
+            setAiFeedbackPending(false)
+          }
+        })
+        .catch(() => {
+          // getMistakeFeedback already falls back internally; ignore unexpected errors.
+          if (aiFeedbackSeq.current === seq) {
+            setAiFeedbackPending(false)
+          }
+        })
+    },
+    [currentQuestion],
   )
 
   const handleStateChange = useCallback(
@@ -296,6 +409,9 @@ export function LessonEngine({
     if (isCorrect) {
       setPhase('correct')
       setLastSubmittedState(questionState)
+      aiFeedbackSeq.current += 1
+      setAiFeedback(null)
+      setAiFeedbackPending(false)
       await persistQuestionResult(true, attempts + 1, questionState)
       return
     }
@@ -306,6 +422,10 @@ export function LessonEngine({
     setLastSubmittedState(questionState)
     setHasMovedSinceSubmit(false)
 
+    // Ask for personalized feedback on the specific wrong answer. A hint is only on screen from the
+    // second attempt onward (it's revealed after the first miss).
+    requestAiFeedback(questionState, nextAttempts, nextAttempts > 1)
+
     if (nextAttempts === 1) {
       setShowHint(true)
       return
@@ -313,7 +433,7 @@ export function LessonEngine({
 
     setShowExplanation(true)
     await persistQuestionResult(false, nextAttempts, questionState)
-  }, [attempts, currentQuestion, interactionDisabled, persistQuestionResult, questionState])
+  }, [attempts, currentQuestion, interactionDisabled, persistQuestionResult, questionState, requestAiFeedback])
 
   const handleWhy = useCallback(() => {
     setShowExplanation(true)
@@ -338,7 +458,8 @@ export function LessonEngine({
     const advancingFrontier = nextIndex > maxIndex
 
     // Only push the persisted frontier forward — revisiting earlier questions must not rewind it.
-    if (persistHandlers && (advancingFrontier || isLastQuestion)) {
+    // In review mode nothing is persisted at all, so re-reading a finished lesson can't reset it.
+    if (persistHandlers && !reviewing && (advancingFrontier || isLastQuestion)) {
       await persistHandlers.onContinue({
         nextQuestionIndex: isLastQuestion ? questionIndex : nextIndex,
         completed: isLastQuestion,
@@ -373,6 +494,7 @@ export function LessonEngine({
     persistHandlers,
     proceedToIndex,
     questionIndex,
+    reviewing,
     snapshots,
     totalQuestions,
   ])
@@ -432,6 +554,7 @@ export function LessonEngine({
       await persistHandlers.onLessonReset()
     }
 
+    setReviewing(false)
     setLessonComplete(false)
     snapshots.clear()
     setMaxIndex(0)
@@ -578,6 +701,26 @@ export function LessonEngine({
         <h2>{currentQuestion.prompt}</h2>
       </div>
 
+      {strategySuggestion &&
+        phase !== 'correct' &&
+        attempts < 2 &&
+        strategyDismissedFor !== currentQuestion.id && (
+          <div className="strategy-tip" role="note">
+            <span className="strategy-tip__icon" aria-hidden="true">
+              💡
+            </span>
+            <p className="strategy-tip__text">{strategySuggestion.message}</p>
+            <button
+              type="button"
+              className="strategy-tip__dismiss"
+              aria-label="Dismiss suggestion"
+              onClick={() => setStrategyDismissedFor(currentQuestion.id)}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
       <QuestionRenderer
         key={currentQuestion.id}
         question={currentQuestion}
@@ -590,7 +733,14 @@ export function LessonEngine({
         <FeedbackPanel
           isCorrect={phase === 'correct'}
           locked={phase === 'incorrect' && attempts >= 2}
-          message={feedbackMessage}
+          pending={phase === 'incorrect' && aiFeedbackPending && !aiFeedback}
+          message={
+            phase === 'incorrect'
+              ? // While the AI reply is generating, show nothing (the pending placeholder covers it)
+                // so the static message never flashes and then swaps to the AI one.
+                (aiFeedback ?? (aiFeedbackPending ? undefined : feedbackMessage))
+              : feedbackMessage
+          }
         />
       )}
       {showHint && <HintPanel hint={currentQuestion.hint} />}

@@ -1,4 +1,5 @@
 import type { Vec2 } from '../lib/vectorMath'
+import type { ConceptTag } from './concepts'
 
 export type QuestionType =
   | 'drawVector'
@@ -425,7 +426,7 @@ export interface ConstructComboQuestion {
   order: number
 }
 
-export type Question =
+type QuestionVariant =
   | DrawVectorQuestion
   | ReadVectorQuestion
   | FindMagnitudeQuestion
@@ -440,6 +441,15 @@ export type Question =
   | VectorSubtractQuestion
   | LinearComboQuestion
   | ConstructComboQuestion
+
+/**
+ * A lesson or skill-check question. `conceptTags` classify the concepts the question exercises (see
+ * `src/types/concepts.ts`); they are attached at load time from the central tag map and power
+ * personalized feedback, the practice engine, and the concept-level mastery profile.
+ */
+export type Question = QuestionVariant & {
+  conceptTags?: ConceptTag[]
+}
 
 export interface LessonIntro {
   title: string

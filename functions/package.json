@@ -1,0 +1,22 @@
+{
+  "name": "brillianter-functions",
+  "description": "Cloud Functions for the Brillianter AI tutor (OpenAI proxy).",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "npm run build && firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.1.0",
+    "openai": "^4.67.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

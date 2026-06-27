@@ -176,7 +176,8 @@ function randomizeHeadToTail<T extends HeadToTailFullQuestion | HeadToTailFreeQu
     const vectorB: Vec2 = [nonZeroInt(-4, 4), nonZeroInt(-4, 4)]
     const sum = add(vectorA, vectorB)
 
-    if (!vecInBounds(sum, -4, 4)) {
+    // Reject a zero-vector sum: the answer would be ⟨0,0⟩, which the learner can't draw/enter.
+    if (!vecInBounds(sum, -4, 4) || vecEquals(sum, [0, 0])) {
       continue
     }
     if (vecEquals(vectorA, question.correctAnswer.vectorA) && vecEquals(vectorB, question.correctAnswer.vectorB)) {
@@ -184,9 +185,12 @@ function randomizeHeadToTail<T extends HeadToTailFullQuestion | HeadToTailFreeQu
     }
 
     const isFull = question.type === 'headToTailFull'
+    // Keep the "try it on your own" lead-in only if the authored question had it (it sits on the
+    // first unguided question), so retakes don't repeat it on every problem.
+    const tryPrefix = /try it on your own/i.test(question.prompt) ? 'Now try it on your own! ' : ''
     const prompt = isFull
       ? `Here a = ${fmtVec(vectorA)} and b = ${fmtVec(vectorB)} both start at the origin. Align them head-to-tail, draw a + b, then enter what a + b is.`
-      : `Now try it on your own! Here a = ${fmtVec(vectorA)} and b = ${fmtVec(vectorB)}. Move the vectors to find the path, then enter what a + b is.`
+      : `${tryPrefix}Find a + b. Work it out on the grid if it helps.`
 
     return {
       ...question,

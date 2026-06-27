@@ -47,3 +47,12 @@ export async function ensureUserDocument(
 export async function updateCurrentLessonId(userId: string, lessonId: string): Promise<void> {
   await updateDoc(doc(db, 'users', userId), { currentLessonId: lessonId })
 }
+
+/** Resets the profile's progress-related fields back to a brand-new-account state. */
+export async function resetUserProgressState(userId: string): Promise<void> {
+  await updateDoc(doc(db, 'users', userId), {
+    currentStreak: 0,
+    lastActiveDate: null,
+    currentLessonId: 'lesson-1',
+  })
+}

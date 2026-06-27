@@ -65,6 +65,11 @@ export function LessonComplete({
           <button type="button" className="button button--secondary" onClick={onRetry}>
             Retry
           </button>
+          {mastered && (
+            <Link to={`/skill-check/${lessonId}`} className="button button--secondary">
+              Retake skill check
+            </Link>
+          )}
           <Link to={primary.to} className="button button--primary">
             {primary.label}
           </Link>

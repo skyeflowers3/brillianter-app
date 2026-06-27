@@ -12,6 +12,9 @@ interface SkillCheckResultsProps {
   questions: Question[]
   answers: SkillCheckAnswer[]
   onContinue?: () => void
+  /** Label for the Continue button. Defaults to "Continue"; the page sets it to a review-specific
+   * label when Continue leads into the personalized review instead of the dashboard. */
+  continueLabel?: string
   onRetry?: () => void
 }
 
@@ -21,6 +24,7 @@ export function SkillCheckResults({
   questions,
   answers,
   onContinue,
+  continueLabel = 'Continue',
   onRetry,
 }: SkillCheckResultsProps) {
   const missed = questions
@@ -39,7 +43,7 @@ export function SkillCheckResults({
   useEffect(() => {
     if (tier === 'mastered') {
       fireCelebration('full')
-    } else if (tier === 'developing') {
+    } else if (tier === 'proficient') {
       fireCelebration('light')
     }
   }, [tier])
@@ -76,7 +80,7 @@ export function SkillCheckResults({
           )}
           {onContinue && (
             <button type="button" className="button button--primary" onClick={onContinue}>
-              Continue
+              {continueLabel}
             </button>
           )}
         </div>

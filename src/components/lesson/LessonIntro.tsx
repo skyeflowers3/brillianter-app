@@ -1,10 +1,5 @@
-import { CoordinatePlane } from '../svg/CoordinatePlane'
-import { Vector } from '../svg/Vector'
-import { add } from '../../lib/vectorMath'
 import type { LessonIntro as LessonIntroContent } from '../../types/lesson'
-import { MovementFigure } from './MovementFigure'
-import { SubtractionIntroFigure } from './SubtractionIntroFigure'
-import { CombinationIntroFigure } from './CombinationIntroFigure'
+import { LessonIntroFigure } from './LessonIntroFigure'
 
 interface LessonIntroProps {
   intro: LessonIntroContent
@@ -12,66 +7,23 @@ interface LessonIntroProps {
 }
 
 export function LessonIntro({ intro, onContinue }: LessonIntroProps) {
+  // Stepped figures (vector / addition / subtraction) explain each step in their own captions, so
+  // the prose intro paragraphs are hidden to let the animation be the star of the show.
+  const hasSteppedFigure = Boolean(
+    intro.sampleMovement || intro.sampleHeadToTail || intro.sampleSubtraction,
+  )
+
   return (
     <section className="lesson-intro">
-      <div className="lesson-intro__body">
-        {intro.paragraphs.map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
-        ))}
-      </div>
-
-      {intro.sampleMovement && <MovementFigure destination={intro.sampleMovement} />}
-
-      {intro.sampleVector && (
-        <div className="lesson-intro__figure">
-          <CoordinatePlane min={-4} max={4}>
-            <Vector
-              tip={intro.sampleVector}
-              color="var(--lesson-vector-a)"
-              label={intro.sampleVectorLabel}
-            />
-          </CoordinatePlane>
+      {!hasSteppedFigure && (
+        <div className="lesson-intro__body">
+          {intro.paragraphs.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
         </div>
       )}
 
-      {intro.sampleHeadToTail && (
-        <div className="lesson-intro__figure">
-          <CoordinatePlane min={-4} max={4}>
-            <Vector
-              tip={intro.sampleHeadToTail.vectorA}
-              color="var(--lesson-vector-a)"
-              label="A"
-            />
-            <Vector
-              tip={intro.sampleHeadToTail.vectorB}
-              origin={intro.sampleHeadToTail.vectorA}
-              color="var(--lesson-vector-b)"
-              label="B"
-            />
-            <Vector
-              tip={add(intro.sampleHeadToTail.vectorA, intro.sampleHeadToTail.vectorB)}
-              color="var(--lesson-vector-sum)"
-              label="A + B"
-            />
-          </CoordinatePlane>
-        </div>
-      )}
-
-      {intro.sampleSubtraction && (
-        <SubtractionIntroFigure
-          vectorA={intro.sampleSubtraction.vectorA}
-          vectorB={intro.sampleSubtraction.vectorB}
-        />
-      )}
-
-      {intro.sampleCombination && (
-        <CombinationIntroFigure
-          vectorA={intro.sampleCombination.vectorA}
-          vectorB={intro.sampleCombination.vectorB}
-          coefA={intro.sampleCombination.coefA}
-          coefB={intro.sampleCombination.coefB}
-        />
-      )}
+      <LessonIntroFigure intro={intro} />
 
       <div className="lesson-actions">
         <button type="button" className="button button--primary" onClick={onContinue}>

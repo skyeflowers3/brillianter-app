@@ -28,7 +28,7 @@ export interface SkillCheckHistoryEntry {
 }
 
 /** Lesson mastery tier derived from the learner's best skill-check score. */
-export type MasteryStatus = 'mastered' | 'developing' | 'needs_review'
+export type MasteryStatus = 'mastered' | 'proficient' | 'needs_review'
 
 export interface LessonProgress {
   userId: string

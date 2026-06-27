@@ -83,6 +83,9 @@ export function VectorLabelLayer() {
       [...layout.entries.values()],
       layout.min,
       layout.max,
+      // Intentional: the previous frame's label boxes are hysteresis input so labels don't flicker
+      // between slots. It's read-only here and written back in the effect below.
+      // eslint-disable-next-line react-hooks/refs
       previousRef.current,
     )
   }, [layout])

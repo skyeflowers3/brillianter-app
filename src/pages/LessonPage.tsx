@@ -10,7 +10,10 @@ import {
   resetLessonProgress,
 } from '../services/progressService'
 import { updateCurrentLessonId } from '../services/userService'
+import { applyConceptOutcomes, getMasteryProfile } from '../services/masteryProfileService'
+import { getConceptTags } from '../content/conceptTags'
 import type { LessonContent } from '../types/lesson'
+import type { MasteryProfile } from '../types/masteryProfile'
 import type { LessonEnginePersistHandlers } from '../types/lessonEngine'
 import type { LessonProgress, QuestionHistoryEntry } from '../types/progress'
 import { isLessonAvailable } from '../types/lessonMetadata'
@@ -28,6 +31,9 @@ export function LessonPage() {
   } = useProgressContext()
   const [lesson, setLesson] = useState<LessonContent | null>(null)
   const [progress, setProgress] = useState<LessonProgress | null>(null)
+  // Snapshot taken at lesson load; drives adaptive strategy nudges. Best-effort — failure just means
+  // no nudge, never a blocked lesson.
+  const [masteryProfile, setMasteryProfile] = useState<MasteryProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -78,6 +84,14 @@ export function LessonPage() {
             awaitingContinue: lessonProgress.awaitingContinue ?? false,
           })
         }
+
+        getMasteryProfile(activeUser.uid)
+          .then((profile) => {
+            if (!cancelled) {
+              setMasteryProfile(profile)
+            }
+          })
+          .catch(() => {})
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : 'Failed to load lesson.')
@@ -103,6 +117,15 @@ export function LessonPage() {
 
     return {
       onAnswerRecorded: async ({ questionId, correct, attempts, submittedState }) => {
+        // Fold this graded answer into the concept-level mastery profile. Best-effort and
+        // non-blocking: enrichment for the AI features, never gating the lesson flow.
+        const outcomes = getConceptTags(questionId).map((concept) => ({ concept, correct }))
+        if (outcomes.length > 0) {
+          void applyConceptOutcomes(user.uid, outcomes).catch((profileError) => {
+            console.warn('Mastery profile update failed.', profileError)
+          })
+        }
+
         setProgress((current) => {
           if (!current) {
             return current
@@ -171,7 +194,7 @@ export function LessonPage() {
       <section className="lesson-error">
         <h1>Lesson locked</h1>
         <p className="muted">
-          Finish the previous lesson and score at least 2/3 on its skill check to unlock this one.
+          Finish the previous lesson and score at least 4/5 on its skill check to unlock this one.
         </p>
         <Link to="/dashboard">Back to dashboard</Link>
       </section>
@@ -208,6 +231,7 @@ export function LessonPage() {
       initialResumeState={resumeState}
       initialAnswers={answeredSnapshots}
       persistHandlers={persistHandlers}
+      masteryProfile={masteryProfile}
     />
   )
 }

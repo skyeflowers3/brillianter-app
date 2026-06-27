@@ -4,9 +4,9 @@ const COLORS = ['#aa3bff', '#7c3aed', '#2563eb', '#15803d', '#f59e0b']
 
 /**
  * Celebration intensity, kept proportional to the achievement so the effect stays meaningful:
- * - `full`   — a perfect skill check (3/3). The big moment: center burst + side streamers.
- * - `light`  — a strong-but-imperfect skill check (e.g. 2/3). A single modest burst.
- * - `gentle` — finishing a lesson's questions. A small nod that never out-celebrates a 3/3.
+ * - `full`   — a perfect skill check (5/5). The big moment: center burst + side streamers.
+ * - `light`  — a strong-but-imperfect skill check (e.g. 4/5). A single modest burst.
+ * - `gentle` — finishing a lesson's questions. A small nod that never out-celebrates a 5/5.
  */
 export type CelebrationIntensity = 'full' | 'light' | 'gentle'
 

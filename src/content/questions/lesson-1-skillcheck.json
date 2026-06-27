@@ -44,6 +44,34 @@
       "hint": "Direction 90° points straight up. A magnitude of 4 means the arrow is 4 units long, so move 4 units up.",
       "explanation": "90° points straight up, and magnitude 4 means a length of 4. So the vector is ⟨0, 4⟩: 0 horizontal and 4 up. Direction tells you which way it points and magnitude tells you how long it is.",
       "order": 3
+    },
+    {
+      "id": "l1-sc-4",
+      "type": "readVector",
+      "isSkillCheck": true,
+      "prompt": "A vector is shown. What vector is it?",
+      "correctAnswer": {
+        "type": "readVector",
+        "vector": [-1, 3],
+        "tolerance": 0.35
+      },
+      "hint": "Follow the arrow from the origin. Count how far it moves right or left, then how far up or down.",
+      "explanation": "The arrow moves 1 unit left and 3 units up from the origin, so it is the vector ⟨−1, 3⟩. A leftward move makes the first number negative.",
+      "order": 4
+    },
+    {
+      "id": "l1-sc-5",
+      "type": "drawVector",
+      "isSkillCheck": true,
+      "prompt": "Draw a vector with magnitude 3 and direction 180°.",
+      "correctAnswer": {
+        "type": "drawVector",
+        "target": [-3, 0],
+        "tolerance": 0.35
+      },
+      "hint": "Direction 180° points straight left. A magnitude of 3 means the arrow is 3 units long, so move 3 units left.",
+      "explanation": "180° points straight left, and magnitude 3 means a length of 3. So the vector is ⟨−3, 0⟩: 3 left and 0 vertical. Direction tells you which way it points and magnitude tells you how long it is.",
+      "order": 5
     }
   ]
 }

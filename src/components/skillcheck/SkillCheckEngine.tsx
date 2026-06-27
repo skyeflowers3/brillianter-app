@@ -18,6 +18,8 @@ interface SkillCheckEngineProps {
    * the engine knowing about routing. Both are optional; a button only renders when provided.
    */
   onContinue?: () => void
+  /** Optional label for the Continue button (e.g. "Continue to review"). */
+  continueLabel?: string
   onRetry?: () => void
 }
 
@@ -26,6 +28,7 @@ export function SkillCheckEngine({
   lessonTitle,
   onComplete,
   onContinue,
+  continueLabel,
   onRetry,
 }: SkillCheckEngineProps) {
   const [questionIndex, setQuestionIndex] = useState(0)
@@ -83,6 +86,7 @@ export function SkillCheckEngine({
         questions={questions}
         answers={answers}
         onContinue={onContinue}
+        continueLabel={continueLabel}
         onRetry={onRetry}
       />
     )

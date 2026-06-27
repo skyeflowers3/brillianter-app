@@ -1,13 +1,55 @@
 # Brillianter
 
-Brillianter is an interactive vector-math learning app. It guides learners through
-lessons and skill checks on vectors — drawing, adding, subtracting, negating, and
-scaling them — with live SVG diagrams, immediate feedback, hints, and progress
-tracking.
+**Live demo: [https://brillianter-app.web.app](https://brillianter-app.web.app)**
+
+**Subject: Linear Algebra** (introductory vectors).
+
+Brillianter is a learn-by-doing educational platform inspired by Brilliant. Instead of
+teaching through videos or long text, learners build intuition by directly manipulating
+visualizations, answering questions, and getting immediate feedback. The MVP focuses on
+a single introductory **linear algebra** course covering vectors and vector operations —
+drawing, adding, subtracting, negating, scaling, and combining them — with live SVG
+diagrams, immediate feedback, hints, skill checks, and progress tracking.
 
 Built with **React 19**, **TypeScript**, and **Vite**, using **Firebase**
-(Authentication + Cloud Firestore) for sign-in and persisted progress. The UI is
-mobile-responsive.
+(Authentication + Cloud Firestore + Hosting) for sign-in, persisted progress, and
+deployment. The UI is mobile-responsive.
+
+## Live demo
+
+The app is deployed on Firebase Hosting:
+
+- **[https://brillianter-app.web.app](https://brillianter-app.web.app)**
+  (also reachable at [https://brillianter-app.firebaseapp.com](https://brillianter-app.firebaseapp.com))
+
+**Accessing the demo:** progress is tied to an account, so sign in first. You can either:
+
+- **Create an account** with any email + password on the sign-up screen, or
+- **Continue with Google** for one-click sign-in.
+
+New accounts start at Lesson 1 ("What is a Vector?") with later lessons gated until the
+previous one is passed. Work through a lesson, take its skill check, and your progress,
+mastery, and streak persist across sessions and devices.
+
+## Who it's for (target persona)
+
+**Primary user: an undergraduate student (ages 18–24) struggling with their first
+linear algebra course.**
+
+- **Background:** Can often follow examples in class but struggles to build intuition
+  independently. Learns best by seeing concepts visually and interacting with them
+  directly.
+- **Goals:** Understand concepts instead of memorizing procedures, improve course
+  performance, build confidence solving problems independently, and study in short
+  sessions on a laptop or phone.
+- **Pain points:** Lectures feel abstract, textbooks are dense with symbols and
+  definitions, it's hard to visualize what vectors represent, and conventional practice
+  problems give limited feedback.
+
+Brillianter targets these pain points directly: every concept is taught through
+interactive coordinate-plane diagrams with immediate, specific feedback and hints, so
+the learner can experiment, recover from mistakes, and build geometric intuition rather
+than rote procedure.
 
 ## Prerequisites
 
@@ -67,10 +109,20 @@ Rules (`firestore.rules`), not by hiding these values.
 | `npm run preview` | `vite preview` | Serve the built `dist/` output locally to preview the production build. |
 | `npm run seed` | `tsx scripts/seedFirestore.ts` | Seed lessons and questions into Firestore from `src/content/`. |
 
-There are also `firebase:deploy`, `firebase:deploy:hosting`, and
-`firebase:deploy:rules` scripts. **Deployment is out of scope for this phase** — the
-scripts are documented here only for completeness and are not covered by these
-instructions.
+### Deployment
+
+The app is deployed to **Firebase Hosting** at
+[https://brillianter-app.web.app](https://brillianter-app.web.app). The following scripts
+build and deploy it (they require the Firebase CLI and access to the project):
+
+| Script | Command | Description |
+| --- | --- | --- |
+| `npm run firebase:deploy` | `npm run build && firebase deploy` | Build, then deploy hosting + Firestore rules + functions. |
+| `npm run firebase:deploy:hosting` | `npm run build && firebase deploy --only hosting` | Build, then deploy the `dist/` site only. |
+| `npm run firebase:deploy:rules` | `firebase deploy --only firestore:rules` | Deploy Firestore security rules only. |
+
+The hosting and full-deploy scripts run `npm run build` first, so `dist/` always reflects
+the latest code before it ships.
 
 ## Running the app
 

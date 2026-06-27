@@ -199,7 +199,7 @@ export function ConstructComboQuestion({
       return 'Now scale B until the path reaches the point, then fill in the scalars c and d below.'
     }
     if (!gated) {
-      return 'Use the grid if it helps, then fill in the vector’s components below.'
+      return 'You don’t have to move or draw the vectors — use the grid if it helps, then fill in the vector’s components below.'
     }
     if (!scaledAOk) return 'Scale A: drag the head of A until it is the right multiple.'
     if (!connectedOk) return 'Connect head-to-tail: drag B’s tail to the head of the scaled A.'

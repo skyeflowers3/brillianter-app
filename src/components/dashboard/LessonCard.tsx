@@ -66,7 +66,7 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
           </button>
         </div>
         <p className="lesson-card__lock-hint">
-          Finish the previous lesson and score at least 2/3 on its skill check to unlock this one.
+          Finish the previous lesson and score at least 4/5 on its skill check to unlock this one.
         </p>
       </article>
     )
@@ -139,9 +139,14 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
             </Link>
           </>
         ) : masteryStatus === 'mastered' ? (
-          <Link to={lessonHref} className="button button--primary lesson-card__cta">
-            Review lesson
-          </Link>
+          <>
+            <Link to={lessonHref} className="button button--secondary lesson-card__cta">
+              Review lesson
+            </Link>
+            <Link to={skillCheckHref} className="button button--primary lesson-card__cta">
+              Retake skill check
+            </Link>
+          </>
         ) : masteryStatus === 'needs_review' && retakePending ? (
           <>
             {reviewLessonLink}

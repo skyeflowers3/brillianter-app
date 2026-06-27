@@ -5,11 +5,7 @@
   "intro": {
     "title": "What Is a Vector?",
     "paragraphs": [
-      "A vector describes movement.",
-      "The vector ⟨3, 2⟩ means:",
-      "Move 3 units right.",
-      "Move 2 units up.",
-      "Vectors help us describe movement on a coordinate plane."
+      "A vector represents movement — how far left or right and up or down a path goes."
     ],
     "sampleMovement": [3, 2]
   },
@@ -20,6 +16,7 @@
       "heading": "Direction and Magnitude",
       "segments": [
         { "type": "text", "value": "Every vector has a direction and magnitude (length)." },
+        { "type": "text", "value": "For these problems, we measure direction as the counterclockwise angle from the positive x-axis." },
         { "type": "text", "value": "For example, ⟨0, 2⟩ points straight up. Its direction is 90° and its magnitude is 2." }
       ],
       "figure": {

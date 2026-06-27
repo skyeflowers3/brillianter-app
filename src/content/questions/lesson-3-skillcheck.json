@@ -60,6 +60,42 @@
       "hint": "A vector is cA only if BOTH components are the same multiple of A. Since A = ⟨2, 3⟩, cA = ⟨2c, 3c⟩.",
       "explanation": "⟨2c, 3c⟩ gives ⟨4, 6⟩ (c = 2), ⟨−2, −3⟩ (c = −1), and ⟨6, 9⟩ (c = 3). The others change the ratio between the components, so they can't be written as cA.",
       "order": 3
+    },
+    {
+      "id": "l3-sc-4",
+      "type": "scalarSlider",
+      "mode": "createVector",
+      "isSkillCheck": true,
+      "prompt": "Drag the head of the vector to create −2A, then enter the resulting vector.",
+      "referenceLabel": "A = ⟨2, 1⟩",
+      "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "correctAnswer": {
+        "type": "scalarSlider",
+        "baseVector": [2, 1],
+        "scalar": -2,
+        "tolerance": 0.1
+      },
+      "hint": "−2A multiplies each component of A by −2. Drag the head through the origin until c = −2 and read off ⟨−2·2, −2·1⟩.",
+      "explanation": "−2 · ⟨2, 1⟩ = ⟨−2·2, −2·1⟩ = ⟨−4, −2⟩. A negative scalar flips the direction, and |−2| = 2 doubles the length.",
+      "order": 4
+    },
+    {
+      "id": "l3-sc-5",
+      "type": "scalarSlider",
+      "mode": "findScalar",
+      "isSkillCheck": true,
+      "prompt": "Drag the head of the vector until c·A matches ⟨4, −2⟩, then enter the scalar c.",
+      "referenceLabel": "A = ⟨2, −1⟩",
+      "slider": { "min": -4, "max": 4, "step": 0.5 },
+      "correctAnswer": {
+        "type": "scalarSlider",
+        "baseVector": [2, -1],
+        "scalar": 2,
+        "tolerance": 0.1
+      },
+      "hint": "⟨4, −2⟩ points the same way as A and is twice as long, so c must be positive. What number times 2 gives 4?",
+      "explanation": "c · ⟨2, −1⟩ = ⟨4, −2⟩ means 2c = 4 and −1c = −2, so c = 2. A positive scalar keeps the direction and doubles the length.",
+      "order": 5
     }
   ]
 }

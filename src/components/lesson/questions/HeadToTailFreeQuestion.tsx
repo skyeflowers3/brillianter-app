@@ -130,16 +130,6 @@ export function HeadToTailFreeQuestion({
         )}
       </CoordinatePlane>
 
-      {!disabled && (
-        <>
-          <p className="head-to-tail-free-question__status">Now try it on your own!</p>
-          <p className="head-to-tail-free-question__help muted">
-            Move b and draw a + b however you like — no steps are checked. Just enter the correct
-            a + b below to submit.
-          </p>
-        </>
-      )}
-
       <div className="head-to-tail-free-question__equation">
         <ColumnVector value={vectorA} color="var(--lesson-vector-a)" label="vector a" />
         <span className="vector-equation__op" aria-hidden="true">

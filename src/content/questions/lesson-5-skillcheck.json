@@ -75,6 +75,54 @@
       "hint": "Scale A and B until the path lands on ⟨5, 4⟩. The scale factor on A is c, and the one on B is d.",
       "explanation": "⟨5, 4⟩ = 2·⟨2, 1⟩ + 1·⟨1, 2⟩ = ⟨4, 2⟩ + ⟨1, 2⟩, so c = 2 and d = 1.",
       "order": 3
+    },
+    {
+      "id": "l5-sc-4",
+      "type": "constructCombo",
+      "mode": "construct",
+      "gated": false,
+      "isSkillCheck": true,
+      "prompt": "What is 3A − B? Fill in the vector’s components below — use the grid if it helps.",
+      "referenceLabel": "A = ⟨2, 1⟩, B = ⟨1, 2⟩",
+      "expressionLabel": "3A − B",
+      "coefficient": { "min": -4, "max": 4, "step": 1 },
+      "planeMin": -8,
+      "planeMax": 8,
+      "correctAnswer": {
+        "type": "constructCombo",
+        "vectorA": [2, 1],
+        "vectorB": [1, 2],
+        "coefA": 3,
+        "coefB": -1,
+        "target": [5, 1],
+        "tolerance": 0.2
+      },
+      "hint": "Scale A by 3 and B by −1 (drag its head through the origin), then connect them head-to-tail.",
+      "explanation": "3A − B = ⟨6, 3⟩ + ⟨−1, −2⟩ = ⟨5, 1⟩.",
+      "order": 4
+    },
+    {
+      "id": "l5-sc-5",
+      "type": "constructCombo",
+      "mode": "findScalars",
+      "isSkillCheck": true,
+      "prompt": "What scalars c and d make c·A + d·B = ⟨4, 5⟩? Fill them in below — use the grid to scale and connect if it helps.",
+      "referenceLabel": "A = ⟨2, 1⟩, B = ⟨1, 2⟩",
+      "coefficient": { "min": -4, "max": 4, "step": 1 },
+      "planeMin": -8,
+      "planeMax": 8,
+      "correctAnswer": {
+        "type": "constructCombo",
+        "vectorA": [2, 1],
+        "vectorB": [1, 2],
+        "coefA": 1,
+        "coefB": 2,
+        "target": [4, 5],
+        "tolerance": 0.2
+      },
+      "hint": "Scale A and B until the path lands on ⟨4, 5⟩. The scale factor on A is c, and the one on B is d.",
+      "explanation": "⟨4, 5⟩ = 1·⟨2, 1⟩ + 2·⟨1, 2⟩ = ⟨2, 1⟩ + ⟨2, 4⟩, so c = 1 and d = 2.",
+      "order": 5
     }
   ]
 }

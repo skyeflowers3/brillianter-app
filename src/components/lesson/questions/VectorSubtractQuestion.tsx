@@ -38,7 +38,6 @@ export function VectorSubtractQuestion({
 }: VectorSubtractQuestionProps) {
   const { vectorA, vectorB } = state
   const tolerance = question.correctAnswer.tolerance
-  const negB: Vec2 = [-vectorB[0], -vectorB[1]]
   const reversed = equalsWithTolerance(state.negDisp, scale(vectorB, -1), tolerance)
   const connected = reversed && equalsWithTolerance(state.negTail, vectorA, tolerance)
   const negMoved = state.negTail[0] !== 0 || state.negTail[1] !== 0
@@ -58,8 +57,8 @@ export function VectorSubtractQuestion({
   const showSum = negMoved && (!guided || reversed)
 
   const handleReverse = useCallback(() => {
-    onStateChange({ ...state, negDisp: negB })
-  }, [negB, onStateChange, state])
+    onStateChange({ ...state, negDisp: [-vectorB[0], -vectorB[1]] })
+  }, [onStateChange, state, vectorB])
 
   const handleTailDrag = useCallback(
     (position: Vec2) => {
@@ -208,7 +207,8 @@ export function VectorSubtractQuestion({
 
       {!disabled && !guided && (
         <p className="vector-subtract-question__status">
-          Work it out on the grid if it helps, then enter A − B below.
+          You don’t have to move or draw the vectors — work it out on the grid if it helps, then
+          enter A − B below.
         </p>
       )}
 

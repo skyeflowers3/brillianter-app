@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ProgressProvider } from './context/ProgressContext'
 import { LessonNavigationProvider } from './context/LessonNavigationContext'
+import { TutorProvider } from './context/TutorContext'
 import { AppLayout } from './components/layout/AppLayout'
 import { ProtectedRoute } from './components/routing/ProtectedRoute'
 import { PublicRoute } from './components/routing/PublicRoute'
@@ -21,6 +22,9 @@ const LessonPage = lazy(() =>
 )
 const SkillCheckPage = lazy(() =>
   import('./pages/SkillCheckPage').then((m) => ({ default: m.SkillCheckPage })),
+)
+const RemediationPage = lazy(() =>
+  import('./pages/RemediationPage').then((m) => ({ default: m.RemediationPage })),
 )
 
 function RouteFallback() {
@@ -49,7 +53,9 @@ function ProtectedAppShell() {
   return (
     <ProgressProvider>
       <LessonNavigationProvider>
-        <AppLayout />
+        <TutorProvider>
+          <AppLayout />
+        </TutorProvider>
       </LessonNavigationProvider>
     </ProgressProvider>
   )
@@ -71,6 +77,7 @@ export default function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/lesson/:lessonId" element={<LessonPage />} />
                 <Route path="/skill-check/:lessonId" element={<SkillCheckPage />} />
+                <Route path="/remediation/:lessonId" element={<RemediationPage />} />
               </Route>
             </Route>
 

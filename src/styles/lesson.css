@@ -42,9 +42,15 @@
 }
 
 .lesson-interstitial {
-  max-width: 640px;
+  /* Match .lesson-engine / .lesson-intro so the text and grid line up with the questions instead of
+     sitting further right inside a narrower, centered column. */
+  max-width: 760px;
   margin: 0 auto;
   text-align: left;
+}
+
+.lesson-interstitial__figure {
+  margin: 20px 0 24px;
 }
 
 .lesson-interstitial__heading {
@@ -503,6 +509,43 @@
   }
 }
 
+/* Shared stepped intro (vector / addition / subtraction): left-aligned grid with a large caption
+   that explains the current step. The grid lines up with the rest of the lesson content. */
+.stepped-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 20px 0 24px;
+}
+
+.stepped-intro__caption {
+  /* Reserve height so the grid below never shifts as the caption changes. At least 2x the size of
+     the old captions so the explanation is easy to read. */
+  min-height: 1.3em;
+  margin: 0 0 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.25;
+  color: var(--text-h);
+}
+
+.stepped-intro__grid {
+  width: 100%;
+  max-width: 448px;
+  margin: 0;
+}
+
+/* "What is a Vector?" intro: a slightly smaller grid (~17% narrower) than the addition/subtraction
+   intros. */
+.stepped-intro--compact .stepped-intro__grid {
+  max-width: 372px;
+}
+
+.stepped-intro__stage {
+  animation: subtraction-stage-fade 0.45s ease;
+}
+
 .subtraction-intro {
   display: flex;
   flex-direction: column;
@@ -808,6 +851,13 @@
 .lesson-feedback--incorrect {
   background: rgba(185, 28, 28, 0.1);
   color: var(--lesson-incorrect);
+}
+
+.lesson-feedback--pending {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+  font-weight: 500;
+  font-style: italic;
 }
 
 .lesson-panel {
@@ -1139,4 +1189,231 @@
 .span-figure__sample {
   fill: var(--lesson-vector-a);
   opacity: 0.55;
+}
+
+/* --- Remediation flow + practice runner ---------------------------------- */
+
+.remediation {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.remediation__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin: 0 0 4px;
+}
+
+.remediation__title {
+  margin: 0 0 20px;
+  color: var(--text-h);
+}
+
+.remediation__card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+/* The card aligns its children to the start, which would collapse the width-100% coordinate planes
+   to a tiny box. Stretch the figure wrapper to full width and let the reused lesson figure / tutor
+   diagram grow to a comfortable teaching size. */
+.remediation__figure {
+  align-self: stretch;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.remediation__figure > * {
+  width: 100%;
+  max-width: 460px;
+}
+
+.remediation__figure .coordinate-plane,
+.remediation__figure .stepped-intro__grid {
+  max-width: 460px;
+}
+
+.remediation__figure .tutor-diagram__plane {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.remediation__lead {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0;
+}
+
+.remediation__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.remediation__option {
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.remediation__focus {
+  margin: 0;
+  color: var(--text);
+}
+
+.remediation__reply {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text-h);
+  white-space: pre-wrap;
+}
+
+.remediation__done-title {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.remediation__done-card {
+  margin: 0 auto;
+}
+
+.remediation__done-card .lesson-actions {
+  justify-content: center;
+}
+
+.practice-runner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.practice-runner__progress {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.practice-runner__prompt h2 {
+  margin: 0;
+  color: var(--text-h);
+}
+
+/* --- Adaptive strategy nudge --------------------------------------------- */
+
+.strategy-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.strategy-tip__icon {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.strategy-tip__text {
+  margin: 0;
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text-h);
+}
+
+.strategy-tip__dismiss {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 6px;
+}
+
+.strategy-tip__dismiss:hover {
+  color: var(--text-h);
+}
+
+/* --- Unprompted tutor tip (review/practice) ------------------------------ */
+
+.tutor-tip {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.tutor-tip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.tutor-tip__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.tutor-tip__text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text-h);
+  white-space: pre-line;
+}
+
+.tutor-tip__dismiss {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 6px;
+}
+
+.tutor-tip__dismiss:hover {
+  color: var(--text-h);
+}
+
+.tutor-tip .tutor-diagram__plane {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid rgba(127, 127, 127, 0.18);
+}
+
+.tutor-tip .tutor-diagram__caption {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  opacity: 0.85;
 }
