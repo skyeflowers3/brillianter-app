@@ -12,6 +12,14 @@ export interface AuthContextValue {
   signOut: () => Promise<void>
   /** Re-fetches the signed-in user's profile (e.g. after a streak update). */
   refreshProfile: () => Promise<void>
+  /**
+   * True only between an auth arrival (sign-in or a session restored on app load) and the first time
+   * the dashboard evaluates it. Used to gate the daily-review redirect to a fresh login, so mid-
+   * session visits to the dashboard never trigger it.
+   */
+  freshLogin: boolean
+  /** Marks the fresh-login signal as spent for this session. */
+  consumeFreshLogin: () => void
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

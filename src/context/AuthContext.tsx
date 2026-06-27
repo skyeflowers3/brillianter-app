@@ -18,10 +18,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  // Set on every auth arrival (sign-in or session restore); the dashboard consumes it so the daily
+  // review only triggers on a fresh login, not on later in-session navigation back to the dashboard.
+  const [freshLogin, setFreshLogin] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
       setUser(nextUser)
+      setFreshLogin(Boolean(nextUser))
 
       // The profile fetch can fail (network blip, Firestore rules, offline). If it throws we must
       // still clear `loading`, otherwise the whole app is stuck on the "Loading..." screen forever
@@ -67,6 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await signOut()
   }, [])
 
+  const consumeFreshLogin = useCallback(() => {
+    setFreshLogin(false)
+  }, [])
+
   const handleRefreshProfile = useCallback(async () => {
     if (!user) {
       return
@@ -89,6 +97,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       createAccountWithEmail: handleCreateAccountWithEmail,
       signOut: handleSignOut,
       refreshProfile: handleRefreshProfile,
+      freshLogin,
+      consumeFreshLogin,
     }),
     [
       user,
@@ -99,6 +109,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       handleCreateAccountWithEmail,
       handleSignOut,
       handleRefreshProfile,
+      freshLogin,
+      consumeFreshLogin,
     ],
   )
 

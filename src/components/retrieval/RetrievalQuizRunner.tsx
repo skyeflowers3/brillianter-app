@@ -77,7 +77,7 @@ export function RetrievalQuizRunner({ questions, onComplete, onSkip }: Retrieval
       <header className="skillcheck__header">
         <div className="retrieval__header-row">
           <h1 className="skillcheck__title">
-            Daily Review — Question {questionIndex + 1} of {totalQuestions}
+            Daily Review: Question {questionIndex + 1} of {totalQuestions}
           </h1>
           <button type="button" className="button button--secondary retrieval__skip" onClick={onSkip}>
             Skip for today

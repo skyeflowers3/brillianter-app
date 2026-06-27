@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useLessons } from '../hooks/useLessons'
@@ -9,18 +10,26 @@ import { hasStartedLearning, isLessonUnlocked } from '../lib/lessonAccess'
 import { isRetrievalQuizDue } from '../lib/retrieval'
 
 export function DashboardPage() {
-  const { profile } = useAuth()
+  const { profile, freshLogin, consumeFreshLogin } = useAuth()
   const { lessons, loading, error } = useLessons()
   const { progressByLesson, getProgress, loading: progressLoading } = useProgressContext()
 
-  // Daily retrieval gate: landing on the dashboard sends the learner into today's review when one is
-  // due (Lesson 1 done + not yet shown/consumed today). We wait for the profile and progress to load
-  // so `lastRetrievalQuizDate` is known — otherwise a not-yet-loaded profile could redirect after the
-  // quiz was already consumed. The redirect is one-way (Daily Review never bounces back here) and
-  // becomes a no-op once the day is marked consumed, so there's no loop. This gate lives only on the
-  // dashboard; no other page redirects.
-  const dailyReviewDue =
-    !!profile && !progressLoading && isRetrievalQuizDue(profile, progressByLesson)
+  // Daily retrieval gate: a FRESH login (sign-in or session restore) that lands on the dashboard with
+  // a review due (Lesson 1 done + not yet shown/consumed today) is sent into today's review. We wait
+  // for the profile and progress to load so `lastRetrievalQuizDate` is known. Gating on `freshLogin`
+  // means later in-session visits to the dashboard — e.g. right after finishing a lesson — never
+  // trigger it; the next redirect only happens on the next login. The redirect is one-way (Daily
+  // Review never bounces back here) and lives only on the dashboard.
+  const ready = !!profile && !progressLoading
+  const dailyReviewDue = ready && freshLogin && isRetrievalQuizDue(profile, progressByLesson)
+
+  // The fresh-login signal is spent the first time the dashboard evaluates it with data loaded —
+  // whether or not we redirect — so completing a lesson and returning here can't open the review.
+  useEffect(() => {
+    if (ready && freshLogin) {
+      consumeFreshLogin()
+    }
+  }, [ready, freshLogin, consumeFreshLogin])
 
   const namePart = profile ? `, ${profile.name}` : ''
   const isNewUser = !hasStartedLearning(progressByLesson)
