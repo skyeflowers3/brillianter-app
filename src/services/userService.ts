@@ -2,6 +2,19 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebaseDb'
 import type { UserProfile, UserProfileInput } from '../types/user'
 
+/**
+ * The progress-related fields of a brand-new account. Shared by account creation and "Reset
+ * progress" so a reset always lands the learner in the exact same state as a fresh sign-up — in
+ * particular `lastRetrievalQuizDate: null`, so a daily review becomes due again as soon as Lesson 1
+ * is completed. Identity fields (userId/name/email) are intentionally excluded.
+ */
+const NEW_ACCOUNT_PROGRESS_STATE = {
+  currentStreak: 0,
+  lastActiveDate: null,
+  currentLessonId: 'lesson-1',
+  lastRetrievalQuizDate: null,
+} satisfies Partial<UserProfile>
+
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const snapshot = await getDoc(doc(db, 'users', userId))
 
@@ -20,10 +33,7 @@ export async function createUserDocument(
     userId,
     name: input.name,
     email: input.email,
-    currentStreak: 0,
-    lastActiveDate: null,
-    currentLessonId: 'lesson-1',
-    lastRetrievalQuizDate: null,
+    ...NEW_ACCOUNT_PROGRESS_STATE,
   }
 
   await setDoc(doc(db, 'users', userId), profile)
@@ -64,10 +74,5 @@ export async function setLastRetrievalQuizDate(userId: string, dateKey: string):
 
 /** Resets the profile's progress-related fields back to a brand-new-account state. */
 export async function resetUserProgressState(userId: string): Promise<void> {
-  await updateDoc(doc(db, 'users', userId), {
-    currentStreak: 0,
-    lastActiveDate: null,
-    currentLessonId: 'lesson-1',
-    lastRetrievalQuizDate: null,
-  })
+  await updateDoc(doc(db, 'users', userId), { ...NEW_ACCOUNT_PROGRESS_STATE })
 }
