@@ -24,17 +24,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
       setUser(nextUser)
 
-      if (nextUser) {
-        const nextProfile = await ensureUserDocument(nextUser.uid, {
-          name: nextUser.displayName ?? nextUser.email ?? 'Learner',
-          email: nextUser.email ?? '',
-        })
-        setProfile(nextProfile)
-      } else {
+      // The profile fetch can fail (network blip, Firestore rules, offline). If it throws we must
+      // still clear `loading`, otherwise the whole app is stuck on the "Loading..." screen forever
+      // and the user can never reach the dashboard. A failed profile load degrades to a null profile
+      // (recoverable on the next auth event / reload) rather than a hard lock.
+      try {
+        if (nextUser) {
+          const nextProfile = await ensureUserDocument(nextUser.uid, {
+            name: nextUser.displayName ?? nextUser.email ?? 'Learner',
+            email: nextUser.email ?? '',
+          })
+          setProfile(nextProfile)
+        } else {
+          setProfile(null)
+        }
+      } catch (error) {
+        console.error('Failed to load user profile', error)
         setProfile(null)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     })
 
     return unsubscribe

@@ -7,7 +7,7 @@ import { loadSkillCheckContent } from '../services/questionService'
 import { recordSkillCheckResult } from '../services/progressService'
 import { updateStreak } from '../services/streakService'
 import { applyConceptOutcomes, deriveOutcomesFromAnswers } from '../services/masteryProfileService'
-import { getMasteryStatus } from '../services/masteryService'
+import { evaluateMastery } from '../services/masteryService'
 import { randomizeSkillCheck } from '../lib/skillCheckRandomizer'
 import type { LessonContent } from '../types/lesson'
 import type { SkillCheckResult } from '../types/progress'
@@ -22,6 +22,10 @@ export function SkillCheckPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [attemptKey, setAttemptKey] = useState(0)
+  // The result the learner just completed. Routing keys off this (not the best-attempt mastery
+  // status) so the decision reflects what they actually just scored — and isn't stale while the
+  // post-completion progress refresh is still in flight.
+  const [lastResult, setLastResult] = useState<SkillCheckResult | null>(null)
   // Latches true once the content and the first progress load are both done. After that we never
   // re-gate on progress loading, so the refreshProgress() call that runs when a skill check finishes
   // can't unmount/remount the engine (which would silently restart the skill check).
@@ -100,6 +104,8 @@ export function SkillCheckPage() {
         return
       }
 
+      setLastResult(result)
+
       try {
         await recordSkillCheckResult(user.uid, lessonId, result)
         // Fold the skill-check signals into the concept-level mastery profile so feedback, practice,
@@ -114,11 +120,13 @@ export function SkillCheckPage() {
     [lessonId, questions, refreshProfile, refreshProgress, user],
   )
 
-  // As long as the lesson is still unpassed (best score is Needs Review), Continue routes into the
-  // personalized remediation flow — so failing the skill check again sends the learner to a fresh
-  // practice. Once they've passed (Proficient/Mastered), Continue returns to the dashboard.
+  // Routing is based on the attempt they just completed: a passing score (Proficient/Mastered, i.e.
+  // 4/5 or better) goes straight to the dashboard, while a Needs Review attempt (<4/5) routes into
+  // the personalized remediation flow so failing again sends the learner to a fresh practice.
   const continuesToReview =
-    !!lessonId && getMasteryStatus(getProgress(lessonId)) === 'needs_review'
+    !!lessonId &&
+    !!lastResult &&
+    evaluateMastery(lastResult.score, lastResult.total) === 'needs_review'
 
   const handleContinue = useCallback(() => {
     navigate(continuesToReview ? `/remediation/${lessonId}` : '/dashboard')

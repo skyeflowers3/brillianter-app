@@ -66,6 +66,10 @@ export const CoordinatePlane = forwardRef<SVGSVGElement, CoordinatePlaneProps>(
           width={max - min}
           height={max - min}
           className="coordinate-plane__background"
+          // Fallback fill so the plane can never render as a black box: an SVG <rect> with no fill
+          // defaults to black, which is exactly what showed if lesson.css hadn't applied yet. --bg is
+          // defined in index.css (always loaded), and the class rule still overrides this attribute.
+          fill="var(--bg)"
         />
 
         <Grid min={min} max={max} />
