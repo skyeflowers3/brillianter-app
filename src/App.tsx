@@ -1,10 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import { ProgressProvider } from './context/ProgressContext'
-import { LessonNavigationProvider } from './context/LessonNavigationContext'
-import { TutorProvider } from './context/TutorContext'
-import { AppLayout } from './components/layout/AppLayout'
 import { ProtectedRoute } from './components/routing/ProtectedRoute'
 import { PublicRoute } from './components/routing/PublicRoute'
 import { useAuth } from './hooks/useAuth'
@@ -29,6 +25,11 @@ const RemediationPage = lazy(() =>
 const DailyReviewPage = lazy(() =>
   import('./pages/DailyReviewPage').then((m) => ({ default: m.DailyReviewPage })),
 )
+// The authenticated shell (progress/tutor providers + chrome) is split out so the Firestore SDK it
+// depends on isn't part of the initial login bundle.
+const ProtectedAppShell = lazy(() =>
+  import('./components/routing/ProtectedAppShell').then((m) => ({ default: m.ProtectedAppShell })),
+)
 
 function RouteFallback() {
   return (
@@ -50,18 +51,6 @@ function RootRedirect() {
   }
 
   return <Navigate to={user ? '/dashboard' : '/login'} replace />
-}
-
-function ProtectedAppShell() {
-  return (
-    <ProgressProvider>
-      <LessonNavigationProvider>
-        <TutorProvider>
-          <AppLayout />
-        </TutorProvider>
-      </LessonNavigationProvider>
-    </ProgressProvider>
-  )
 }
 
 export default function App() {

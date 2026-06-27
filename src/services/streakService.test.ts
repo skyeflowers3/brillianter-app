@@ -10,7 +10,7 @@ vi.mock('firebase/firestore', () => ({
   updateDoc: (...args: unknown[]) => updateDoc(...args),
 }))
 
-vi.mock('../firebase', () => ({ db: {} }))
+vi.mock('../firebaseDb', () => ({ db: {} }))
 
 const getUserProfile = vi.fn()
 vi.mock('./userService', () => ({

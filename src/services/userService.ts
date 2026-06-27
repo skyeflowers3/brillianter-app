@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db } from '../firebaseDb'
 import type { UserProfile, UserProfileInput } from '../types/user'
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {

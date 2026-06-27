@@ -1,5 +1,5 @@
 import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '../firebase'
+import { db } from '../firebaseDb'
 import type { Question } from '../types/lesson'
 import { CONCEPT_LABELS, type ConceptTag } from '../types/concepts'
 import {

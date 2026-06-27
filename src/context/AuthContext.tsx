@@ -7,7 +7,6 @@ import {
   signInWithGoogle,
   signOut,
 } from '../services/authService'
-import { ensureUserDocument, getUserProfile } from '../services/userService'
 import type { UserProfile } from '../types/user'
 import { AuthContext } from './auth-context'
 
@@ -30,6 +29,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // (recoverable on the next auth event / reload) rather than a hard lock.
       try {
         if (nextUser) {
+          // Imported on demand so userService (and the Firestore SDK it pulls in) stays out of the
+          // initial bundle — a logged-out visitor never downloads Firestore.
+          const { ensureUserDocument } = await import('../services/userService')
           const nextProfile = await ensureUserDocument(nextUser.uid, {
             name: nextUser.displayName ?? nextUser.email ?? 'Learner',
             email: nextUser.email ?? '',
@@ -70,6 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
+    const { getUserProfile } = await import('../services/userService')
     const nextProfile = await getUserProfile(user.uid)
     if (nextProfile) {
       setProfile(nextProfile)
