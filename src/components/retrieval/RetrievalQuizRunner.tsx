@@ -75,12 +75,15 @@ export function RetrievalQuizRunner({ questions, onComplete, onSkip }: Retrieval
   return (
     <section className="skillcheck">
       <header className="skillcheck__header">
-        <h1 className="skillcheck__title">
-          Daily Review — Question {questionIndex + 1} of {totalQuestions}
-        </h1>
-        <p className="skillcheck__progress">
-          A quick interleaved mix from lessons you&apos;ve completed.
-        </p>
+        <div className="retrieval__header-row">
+          <h1 className="skillcheck__title">
+            Daily Review — Question {questionIndex + 1} of {totalQuestions}
+          </h1>
+          <button type="button" className="button button--secondary retrieval__skip" onClick={onSkip}>
+            Skip for today
+          </button>
+        </div>
+        <p className="skillcheck__progress">A quick mix from lessons you&apos;ve completed.</p>
       </header>
 
       <div className="skillcheck__prompt">
@@ -114,9 +117,6 @@ export function RetrievalQuizRunner({ questions, onComplete, onSkip }: Retrieval
             Submit answer
           </button>
         )}
-        <button type="button" className="button button--secondary" onClick={onSkip}>
-          Skip for today
-        </button>
       </div>
     </section>
   )

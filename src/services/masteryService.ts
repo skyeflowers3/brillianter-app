@@ -108,28 +108,25 @@ export function normalizeMasteryStatus(value: unknown): MasteryStatus | null {
  *   - the number of distinct successful spaced-retrieval days (the gate for Mastered).
  *
  * Rules:
- *   1. Legacy docs that earned `mastered` under the old 5/5 rule keep it (never demote). New writes
- *      cap `masteryStatus` at `proficient`, so a stored `mastered` can only be legacy.
- *   2. No skill check recorded yet -> null (no badge), even if retrieval checks have been passed.
- *   3. Otherwise combine the capped skill tier with the successful-retrieval-day count.
+ *   1. No skill check recorded yet -> null (no badge), even if retrieval checks have been passed.
+ *   2. Otherwise combine the capped skill tier with the successful-retrieval-day count. A skill check
+ *      alone (even a perfect 5/5) tops out at Proficient; Mastered is earned ONLY by accumulating
+ *      `RETRIEVALS_FOR_MASTERY` successful spaced-retrieval days. The stored `masteryStatus` field is
+ *      intentionally ignored here so the tier is always derived live — a stale/legacy `mastered`
+ *      value can never short-circuit the spaced-retrieval requirement.
  */
 export function getMasteryStatus(progress: LessonProgress | null | undefined): MasteryStatus | null {
   if (!progress) {
     return null
   }
 
-  // (1) Preserve a legacy Mastered (pre-spaced-retrieval 5/5). Only legacy docs ever store this.
-  if (normalizeMasteryStatus(progress.masteryStatus) === 'mastered') {
-    return 'mastered'
-  }
-
-  // (2) A skill check is required before any status appears — retrieval checks alone don't count.
+  // (1) A skill check is required before any status appears — retrieval checks alone don't count.
   const best = getBestSkillCheck(progress)
   if (!best) {
     return null
   }
 
-  // (3) Combine the (capped) skill-check tier with spaced-retrieval progress, in any order.
+  // (2) Combine the (capped) skill-check tier with spaced-retrieval progress, in any order.
   const skillTier = evaluateMastery(best.score, best.total)
   const cappedSkillTier = skillTier === 'mastered' ? 'proficient' : skillTier
   return computeMasteryLevel(cappedSkillTier, countSuccessfulRetrievalDays(progress.retrievalHistory))

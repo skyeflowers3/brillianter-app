@@ -118,8 +118,19 @@ describe('getMasteryStatus order independence', () => {
     expect(getMasteryStatus(p)).toBe('needs_review')
   })
 
-  it('never demotes a legacy mastered lesson (pre-spaced-retrieval 5/5)', () => {
+  it('ignores a stale/legacy stored mastered value and derives the tier live', () => {
+    // A perfect skill check with no spaced-retrieval days is Proficient, even if an old doc still
+    // carries masteryStatus: 'mastered'. Mastered must be re-earned through spaced retrieval.
     const p = progress({ skillCheckHistory: [skillCheck(5)], masteryStatus: 'mastered' })
+    expect(getMasteryStatus(p)).toBe('proficient')
+  })
+
+  it('derives mastered for a 5/5 only after three successful retrieval days', () => {
+    const p = progress({
+      skillCheckHistory: [skillCheck(5)],
+      masteryStatus: 'mastered',
+      retrievalHistory: passedRetrievals(3),
+    })
     expect(getMasteryStatus(p)).toBe('mastered')
   })
 })

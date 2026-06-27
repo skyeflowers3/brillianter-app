@@ -132,11 +132,6 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
                 {RETRIEVALS_FOR_MASTERY} toward Mastered
               </span>
             )}
-            {masteryStatus === 'mastered' && (
-              <span className="lesson-card__retrieval lesson-card__retrieval--mastered">
-                Long-term mastery earned
-              </span>
-            )}
           </>
         ) : (
           <span className="lesson-card__skillcheck-score lesson-card__skillcheck-score--pending">

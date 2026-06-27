@@ -474,17 +474,12 @@
   font-weight: 500;
 }
 
-/* Spaced-retrieval progress / mastery note — sits on its own row under the tier badge. */
+/* Spaced-retrieval progress note — sits on its own row under the tier badge. */
 .lesson-card__retrieval {
   flex-basis: 100%;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--muted);
-}
-
-.lesson-card__retrieval--mastered {
-  font-weight: 600;
-  color: #b45309;
 }
 
 .lesson-card__actions {

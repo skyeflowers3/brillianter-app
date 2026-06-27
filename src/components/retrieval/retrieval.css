@@ -1,3 +1,23 @@
+.retrieval__header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.retrieval__skip {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .retrieval__skip {
+    padding: 5px 10px;
+  }
+}
+
 .retrieval-outcomes {
   margin-top: 24px;
 }
