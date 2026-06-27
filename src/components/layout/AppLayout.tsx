@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useLessonNavigation } from '../../hooks/useLessonNavigation'
 import { useProgressContext } from '../../hooks/useProgressContext'
 import { deleteAllLessonProgress } from '../../services/progressService'
+import { deleteMasteryProfile } from '../../services/masteryProfileService'
 import { resetUserProgressState } from '../../services/userService'
 import { LeaveLessonDialog } from './LeaveLessonDialog'
 import { AiTutorWidget } from '../tutor/AiTutorWidget'
@@ -30,6 +31,7 @@ export function AppLayout() {
     setResetting(true)
     try {
       await deleteAllLessonProgress(user.uid)
+      await deleteMasteryProfile(user.uid)
       await resetUserProgressState(user.uid)
       await Promise.all([refreshProgress(), refreshProfile()])
       setConfirmingReset(false)

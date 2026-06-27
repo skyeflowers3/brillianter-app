@@ -16,7 +16,11 @@ import {
   type SkillCheckHistoryEntry,
   type SkillCheckResult,
 } from '../types/progress'
-import { evaluateMastery } from './masteryService'
+import {
+  computeMasteryLevel,
+  countSuccessfulRetrievalDays,
+  evaluateMastery,
+} from './masteryService'
 
 export async function getLessonProgress(
   userId: string,
@@ -91,19 +95,19 @@ export async function resetLessonProgress(userId: string, lessonId: string): Pro
 }
 
 /**
- * Marks the required post-Needs-Review remediation as done so the next lesson unlocks regardless of
- * score (the learner can never get permanently stuck). Called when a personalized practice session
- * is completed.
+ * Marks the personalized review (remediation practice) as completed. On its own this does NOT
+ * unlock the next lesson — the learner must still retake the skill check afterward, at which point
+ * `recordSkillCheckResult` sets `requiredRetakeCompleted`. Called when a practice session finishes.
  */
-export async function completeRequiredRetake(
+export async function markRemediationCompleted(
   userId: string,
   lessonId: string,
 ): Promise<LessonProgress> {
   const existing = await ensureLessonProgress(userId, lessonId)
-  if (existing.requiredRetakeCompleted) {
+  if (existing.remediationCompleted) {
     return existing
   }
-  const updated: LessonProgress = { ...existing, requiredRetakeCompleted: true }
+  const updated: LessonProgress = { ...existing, remediationCompleted: true }
   await saveLessonProgress(updated)
   return updated
 }
@@ -129,11 +133,23 @@ export async function recordSkillCheckResult(
   const best = history.reduce((top, entry) =>
     entry.score / entry.total > top.score / top.total ? entry : top,
   )
-  const masteryStatus = evaluateMastery(best.score, best.total)
+  // A skill check alone now tops out at Proficient: a perfect score is strong understanding, but
+  // Mastered must be earned through spaced retrieval over time. We cap the skill-check tier here and
+  // fold in any spaced-retrieval days already accumulated for this lesson to get the effective level.
+  const skillTier = evaluateMastery(best.score, best.total)
+  const cappedSkillTier = skillTier === 'mastered' ? 'proficient' : skillTier
+  const masteryStatus = cappedSkillTier
+  const masteryLevel = computeMasteryLevel(
+    cappedSkillTier,
+    countSuccessfulRetrievalDays(existing.retrievalHistory),
+  )
 
-  // The required retake is satisfied once a second attempt exists (the first attempt is the
-  // original skill check, the second is the retake) — this is what lets a stuck learner advance.
-  const requiredRetakeCompleted = existing.requiredRetakeCompleted === true || attempts >= 2
+  // The required remediation is satisfied once the learner retakes the skill check AFTER completing
+  // the personalized review (i.e. `remediationCompleted` was already true when this attempt was
+  // recorded). This is the "do the review, then retake" path that unlocks the next lesson for a
+  // struggling learner regardless of the retake score, so they can never get permanently stuck.
+  const requiredRetakeCompleted =
+    existing.requiredRetakeCompleted === true || existing.remediationCompleted === true
 
   const updated: LessonProgress = {
     ...existing,
@@ -144,6 +160,7 @@ export async function recordSkillCheckResult(
     skillCheckHistory: history,
     skillCheckAttempts: attempts,
     masteryStatus,
+    masteryLevel,
     requiredRetakeCompleted,
   }
 

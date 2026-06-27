@@ -27,7 +27,28 @@ export interface SkillCheckHistoryEntry {
   answers: SkillCheckAnswer[]
 }
 
-/** Lesson mastery tier derived from the learner's best skill-check score. */
+/**
+ * One lesson's slice of a single daily retrieval quiz. Retention is tracked per lesson, not per
+ * quiz: each lesson that appears in the day's quiz records its own session with how many of ITS
+ * questions were presented/correct and whether that slice passed (>=80%).
+ */
+export interface RetrievalSession {
+  /** Calendar day of the quiz, 'YYYY-MM-DD' (local), so spaced sessions are counted by distinct days. */
+  date: string
+  lessonId: string
+  questionsPresented: number
+  questionsCorrect: number
+  /** True when this lesson's slice was answered at >=80% accuracy. */
+  passedRetrievalSession: boolean
+}
+
+/**
+ * Lesson mastery tier.
+ *
+ * `mastered` now represents demonstrated long-term retention (a Proficient lesson that has passed
+ * three spaced retrieval sessions on three different days), NOT just a strong skill-check score. A
+ * skill check on its own tops out at `proficient`.
+ */
 export type MasteryStatus = 'mastered' | 'proficient' | 'needs_review'
 
 export interface LessonProgress {
@@ -54,10 +75,37 @@ export interface LessonProgress {
   /** Mastery tier from the highest score. Absent until a skill check is recorded. */
   masteryStatus?: MasteryStatus
   /**
-   * True once the learner has completed the required retake after a Needs Review score. Used to
-   * unlock the next lesson regardless of the retake score (so they can never get permanently stuck).
+   * True once the learner has, after a Needs Review score, completed the personalized review AND
+   * then retaken the skill check. This is what unlocks the next lesson regardless of the retake
+   * score (so they can never get permanently stuck). Set when a skill check is recorded while
+   * `remediationCompleted` is already true.
    */
   requiredRetakeCompleted: boolean
+  /**
+   * True once the learner has finished the personalized review (remediation practice) for this
+   * lesson. On its own this does NOT unlock the next lesson — they must still retake the skill check
+   * afterward — but it marks that the review half of the requirement is done.
+   */
+  remediationCompleted?: boolean
+  /**
+   * Per-lesson record of every daily retrieval quiz this lesson has appeared in. Drives promotion
+   * from Proficient to Mastered (three passed sessions on three different calendar days).
+   */
+  retrievalHistory?: RetrievalSession[]
+  /**
+   * Number of distinct calendar days on which this lesson passed its retrieval slice. Derived from
+   * `retrievalHistory`; stored for convenience. Three promotes a Proficient lesson to Mastered.
+   */
+  successfulRetrievalSessions?: number
+  /**
+   * Denormalized snapshot of the effective mastery tier at the last write, for persistence/queries.
+   * NOT the read authority: `getMasteryStatus` derives the tier live from the best skill check plus
+   * the successful-retrieval-day count so the result is independent of completion order. Absent
+   * until a skill check is recorded.
+   */
+  masteryLevel?: MasteryStatus
+  /** Calendar day ('YYYY-MM-DD') this lesson last appeared in a retrieval quiz. Absent until then. */
+  lastRetrievalDate?: string
 }
 
 export type LessonProgressInput = Omit<LessonProgress, 'userId' | 'lessonId'>
@@ -83,6 +131,10 @@ export function createDefaultProgress(userId: string, lessonId: string): LessonP
     awaitingContinue: false,
     skillCheckAttempts: 0,
     requiredRetakeCompleted: false,
+    remediationCompleted: false,
+    retrievalHistory: [],
+    successfulRetrievalSessions: 0,
+    // masteryLevel and lastRetrievalDate stay absent until earned (like masteryStatus/skillCheckScore).
   }
 }
 

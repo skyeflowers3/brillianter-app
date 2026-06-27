@@ -1,8 +1,12 @@
 import type {
   LessonProgress,
   MasteryStatus,
+  RetrievalSession,
   SkillCheckHistoryEntry,
 } from '../types/progress'
+
+/** Distinct successful spaced-retrieval days required to promote a Proficient lesson to Mastered. */
+export const RETRIEVALS_FOR_MASTERY = 3
 
 /**
  * Maps a skill-check score to a mastery tier. This is the single source of truth for the tiers, so
@@ -23,6 +27,46 @@ export function evaluateMastery(score: number, total: number): MasteryStatus {
     return 'proficient'
   }
   return 'needs_review'
+}
+
+/**
+ * Number of DISTINCT calendar days on which the lesson passed its retrieval slice. Counts unique
+ * `date`s among passed sessions, so two passes on the same day (shouldn't happen — one quiz/day) can
+ * never both count toward the spaced requirement. Tolerates a missing/empty history.
+ */
+export function countSuccessfulRetrievalDays(
+  retrievalHistory: RetrievalSession[] | null | undefined,
+): number {
+  if (!retrievalHistory || retrievalHistory.length === 0) {
+    return 0
+  }
+  const passedDays = new Set<string>()
+  for (const session of retrievalHistory) {
+    if (session.passedRetrievalSession) {
+      passedDays.add(session.date)
+    }
+  }
+  return passedDays.size
+}
+
+/**
+ * The effective, displayed mastery tier, combining the (capped) skill-check tier with spaced
+ * retrieval progress:
+ * - `needs_review` whenever the skill-check tier is Needs Review (<4/5), regardless of retrievals.
+ * - `mastered` once a passing skill check (Proficient+) is backed by at least
+ *   `RETRIEVALS_FOR_MASTERY` successful spaced-retrieval days.
+ * - `proficient` otherwise (a strong skill check that hasn't yet demonstrated long-term retention).
+ *
+ * A skill check on its own therefore tops out at `proficient`; only spaced retrieval earns Mastered.
+ */
+export function computeMasteryLevel(
+  skillTier: MasteryStatus,
+  successfulRetrievalSessions: number,
+): MasteryStatus {
+  if (skillTier === 'needs_review') {
+    return 'needs_review'
+  }
+  return successfulRetrievalSessions >= RETRIEVALS_FOR_MASTERY ? 'mastered' : 'proficient'
 }
 
 /** The best skill-check attempt (by ratio) across all recorded attempts, or null if none. */
@@ -54,29 +98,48 @@ export function normalizeMasteryStatus(value: unknown): MasteryStatus | null {
 }
 
 /**
- * Mastery tier for a lesson, or null if no skill check has been taken yet. Prefers the stored
- * `masteryStatus`, falling back to deriving it from history for older progress docs.
+ * Effective mastery tier for a lesson, or null if no skill check has been taken yet.
+ *
+ * This is DERIVED LIVE from the underlying signals rather than read from a stored field, so the
+ * result is independent of the order in which the learner completes things — three passed retrieval
+ * sessions followed by a passing skill check yields the same Mastered as the reverse order, and the
+ * promotion happens the moment both halves are satisfied. The two halves are:
+ *   - the best skill-check score (the gate for ANY status, and for Needs Review vs Proficient), and
+ *   - the number of distinct successful spaced-retrieval days (the gate for Mastered).
+ *
+ * Rules:
+ *   1. Legacy docs that earned `mastered` under the old 5/5 rule keep it (never demote). New writes
+ *      cap `masteryStatus` at `proficient`, so a stored `mastered` can only be legacy.
+ *   2. No skill check recorded yet -> null (no badge), even if retrieval checks have been passed.
+ *   3. Otherwise combine the capped skill tier with the successful-retrieval-day count.
  */
 export function getMasteryStatus(progress: LessonProgress | null | undefined): MasteryStatus | null {
   if (!progress) {
     return null
   }
-  const stored = normalizeMasteryStatus(progress.masteryStatus)
-  if (stored) {
-    return stored
+
+  // (1) Preserve a legacy Mastered (pre-spaced-retrieval 5/5). Only legacy docs ever store this.
+  if (normalizeMasteryStatus(progress.masteryStatus) === 'mastered') {
+    return 'mastered'
   }
 
+  // (2) A skill check is required before any status appears — retrieval checks alone don't count.
   const best = getBestSkillCheck(progress)
-  return best ? evaluateMastery(best.score, best.total) : null
-}
+  if (!best) {
+    return null
+  }
 
-function getAttemptCount(progress: LessonProgress): number {
-  return progress.skillCheckAttempts ?? progress.skillCheckHistory?.length ?? 0
+  // (3) Combine the (capped) skill-check tier with spaced-retrieval progress, in any order.
+  const skillTier = evaluateMastery(best.score, best.total)
+  const cappedSkillTier = skillTier === 'mastered' ? 'proficient' : skillTier
+  return computeMasteryLevel(cappedSkillTier, countSuccessfulRetrievalDays(progress.retrievalHistory))
 }
 
 /**
- * Whether the learner owes a required retake: they scored Needs Review (<4/5) and have not yet
- * completed a second skill-check attempt. The next lesson stays locked while this is true.
+ * Whether the learner still owes the required remediation: they scored Needs Review (<4/5) and have
+ * not yet completed the personalized review AND retaken the skill check. The next lesson stays
+ * locked while this is true. (`requiredRetakeCompleted` is set once a skill check is recorded after
+ * the personalized review is done — see `recordSkillCheckResult`.)
  */
 export function isRequiredRetakePending(progress: LessonProgress | null | undefined): boolean {
   if (!progress) {
@@ -85,10 +148,7 @@ export function isRequiredRetakePending(progress: LessonProgress | null | undefi
   if (getMasteryStatus(progress) !== 'needs_review') {
     return false
   }
-  if (progress.requiredRetakeCompleted) {
-    return false
-  }
-  return getAttemptCount(progress) < 2
+  return !progress.requiredRetakeCompleted
 }
 
 export interface MasteryPresentation {

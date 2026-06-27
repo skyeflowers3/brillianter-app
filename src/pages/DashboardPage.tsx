@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useLessons } from '../hooks/useLessons'
 import { useProgressContext } from '../hooks/useProgressContext'
@@ -5,11 +6,21 @@ import { LessonCard } from '../components/dashboard/LessonCard'
 import { ProgressTrackerCard } from '../components/dashboard/ProgressTrackerCard'
 import { StreakBadge } from '../components/dashboard/StreakBadge'
 import { hasStartedLearning, isLessonUnlocked } from '../lib/lessonAccess'
+import { isRetrievalQuizDue } from '../lib/retrieval'
 
 export function DashboardPage() {
   const { profile } = useAuth()
   const { lessons, loading, error } = useLessons()
   const { progressByLesson, getProgress, loading: progressLoading } = useProgressContext()
+
+  // Daily retrieval gate: landing on the dashboard sends the learner into today's review when one is
+  // due (Lesson 1 done + not yet shown/consumed today). We wait for the profile and progress to load
+  // so `lastRetrievalQuizDate` is known — otherwise a not-yet-loaded profile could redirect after the
+  // quiz was already consumed. The redirect is one-way (Daily Review never bounces back here) and
+  // becomes a no-op once the day is marked consumed, so there's no loop. This gate lives only on the
+  // dashboard; no other page redirects.
+  const dailyReviewDue =
+    !!profile && !progressLoading && isRetrievalQuizDue(profile, progressByLesson)
 
   const namePart = profile ? `, ${profile.name}` : ''
   const isNewUser = !hasStartedLearning(progressByLesson)
@@ -20,6 +31,10 @@ export function DashboardPage() {
       : `Welcome back${namePart}.`
 
   const completedLessons = lessons.filter((lesson) => getProgress(lesson.lessonId)?.completed).length
+
+  if (dailyReviewDue) {
+    return <Navigate to="/daily-review" replace />
+  }
 
   return (
     <section className="dashboard">

@@ -81,6 +81,34 @@
   line-height: 1.2;
 }
 
+.skillcheck-results__tier {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.skillcheck-results__tier--mastered {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.skillcheck-results__tier--proficient {
+  color: var(--accent);
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.skillcheck-results__tier--needs_review {
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
 .skillcheck-results__subtitle {
   margin: 12px 0 0;
   color: var(--text);

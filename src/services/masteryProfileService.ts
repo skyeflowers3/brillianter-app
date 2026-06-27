@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import type { Question } from '../types/lesson'
 import { CONCEPT_LABELS, type ConceptTag } from '../types/concepts'
@@ -155,6 +155,14 @@ export async function getMasteryProfile(userId: string): Promise<MasteryProfile>
 
 export async function saveMasteryProfile(profile: MasteryProfile): Promise<void> {
   await setDoc(doc(db, MASTERY_PROFILE_COLLECTION, profile.userId), profile)
+}
+
+/**
+ * Permanently deletes the user's concept-level mastery profile. Used by "Reset progress" so the
+ * learner truly starts over — next read returns an empty profile via `getMasteryProfile`.
+ */
+export async function deleteMasteryProfile(userId: string): Promise<void> {
+  await deleteDoc(doc(db, MASTERY_PROFILE_COLLECTION, userId))
 }
 
 /**

@@ -72,7 +72,17 @@ describe('passesLessonGate', () => {
     })
     expect(passesLessonGate('lesson-2', { 'lesson-1': needsReview })).toBe(false)
 
-    const retakeDone = { ...needsReview, requiredRetakeCompleted: true }
+    // Completing the personalized review alone is NOT enough — the learner must still retake the
+    // skill check afterward.
+    const reviewedOnly = { ...needsReview, remediationCompleted: true }
+    expect(passesLessonGate('lesson-2', { 'lesson-1': reviewedOnly })).toBe(false)
+
+    // Once the post-review retake is recorded (requiredRetakeCompleted), the next lesson unlocks.
+    const retakeDone = {
+      ...needsReview,
+      remediationCompleted: true,
+      requiredRetakeCompleted: true,
+    }
     expect(passesLessonGate('lesson-2', { 'lesson-1': retakeDone })).toBe(true)
   })
 })

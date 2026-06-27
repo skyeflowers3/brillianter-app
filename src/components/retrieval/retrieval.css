@@ -1,0 +1,55 @@
+.retrieval-outcomes {
+  margin-top: 24px;
+}
+
+.retrieval-outcomes__heading {
+  margin: 0 0 12px;
+  font-size: 1.125rem;
+}
+
+.retrieval-outcomes__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.retrieval-outcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.retrieval-outcome__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.retrieval-outcome__title {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.retrieval-outcome__score {
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.retrieval-outcome__badge {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-h);
+}
+
+.retrieval-outcome__badge--promoted {
+  color: var(--lesson-correct, #15803d);
+}

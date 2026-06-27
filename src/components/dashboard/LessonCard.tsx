@@ -3,10 +3,12 @@ import type { LessonMetadata } from '../../types/lessonMetadata'
 import { isLessonAvailable } from '../../types/lessonMetadata'
 import { deriveLessonStatus, type LessonProgress, type LessonStatus } from '../../types/progress'
 import {
+  countSuccessfulRetrievalDays,
   getBestSkillCheck,
   getMasteryStatus,
   isRequiredRetakePending,
   MASTERY_PRESENTATION,
+  RETRIEVALS_FOR_MASTERY,
 } from '../../services/masteryService'
 
 interface LessonCardProps {
@@ -75,6 +77,9 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
   const skillCheckDone = Boolean(progress?.skillCheckCompleted)
   const masteryStatus = getMasteryStatus(progress)
   const bestSkillCheck = progress ? getBestSkillCheck(progress) : null
+  // Distinct successful spaced-retrieval days so far — the progress toward turning Proficient into
+  // long-term Mastered.
+  const retrievalDays = countSuccessfulRetrievalDays(progress?.retrievalHistory)
   // While a required retake is still owed the next lesson stays locked, so we nudge a Retake. Once
   // it's been taken twice (next lesson unlocked, regardless of score), it becomes Improve Mastery.
   const retakePending = isRequiredRetakePending(progress)
@@ -119,6 +124,17 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
             {bestSkillCheck && (
               <span className="lesson-card__skillcheck-score">
                 Best: {bestSkillCheck.score} / {bestSkillCheck.total}
+              </span>
+            )}
+            {masteryStatus === 'proficient' && (
+              <span className="lesson-card__retrieval">
+                Spaced reviews: {Math.min(retrievalDays, RETRIEVALS_FOR_MASTERY)}/
+                {RETRIEVALS_FOR_MASTERY} toward Mastered
+              </span>
+            )}
+            {masteryStatus === 'mastered' && (
+              <span className="lesson-card__retrieval lesson-card__retrieval--mastered">
+                Long-term mastery earned
               </span>
             )}
           </>

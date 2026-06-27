@@ -18,7 +18,7 @@ import {
   getWeakConcepts,
   summarizeMasteryForTutor,
 } from '../services/masteryProfileService'
-import { completeRequiredRetake } from '../services/progressService'
+import { markRemediationCompleted } from '../services/progressService'
 import { getMasteryStatus } from '../services/masteryService'
 import { CONCEPT_LABELS, isTopicConcept, type ConceptTag } from '../types/concepts'
 import { getLessonMetadata } from '../types/lessonMetadata'
@@ -133,14 +133,14 @@ export function RemediationPage() {
       finishing.current = true
       try {
         // Fold the practice results into the mastery profile, flag the weak concepts to revisit on a
-        // later login, and mark the required retake done so the next lesson unlocks regardless of
-        // score — the learner can never get permanently stuck.
+        // later login, and mark the personalized review done. This does NOT unlock the next lesson on
+        // its own — the learner now needs to retake the skill check, which finalizes the requirement.
         const outcomes = deriveOutcomesFromAnswers(practiceQuestions, answers)
         await applyConceptOutcomes(user.uid, outcomes)
         if (weakTopics.length > 0) {
           await flagConceptsNeedFollowUp(user.uid, weakTopics)
         }
-        await completeRequiredRetake(user.uid, lessonId)
+        await markRemediationCompleted(user.uid, lessonId)
         await refreshProgress()
       } catch (error) {
         console.warn('Failed to finalize remediation', error)
@@ -286,9 +286,10 @@ export function RemediationPage() {
           <div className="celebrate-badge celebrate-badge--proficient" aria-hidden="true">
             🎯
           </div>
-          <h2 className="lesson-complete__title">Nice work — the next lesson is unlocked!</h2>
+          <h2 className="lesson-complete__title">Great practice — now retake the skill check</h2>
           <p className="lesson-complete__subtitle">
-            You finished your personalized review of “{lessonTitle}”.
+            You finished your personalized review of “{lessonTitle}”. Retake the skill check to
+            unlock the next lesson.
           </p>
           <p className="lesson-complete__note muted">
             We'll keep an eye on{' '}
@@ -303,11 +304,11 @@ export function RemediationPage() {
             >
               Retry practice
             </button>
-            <Link to={`/skill-check/${lessonId}`} className="button button--secondary">
-              Retake skill check
-            </Link>
-            <Link to="/dashboard" className="button button--primary">
+            <Link to="/dashboard" className="button button--secondary">
               Back to dashboard
+            </Link>
+            <Link to={`/skill-check/${lessonId}`} className="button button--primary">
+              Retake skill check
             </Link>
           </div>
         </div>

@@ -35,37 +35,47 @@ export function SkillCheckResults({
     .map((question) => ({ question }))
 
   const isPerfect = missed.length === 0
-  // Tier reflects this attempt's score; celebration scales with it (full for perfect, a lighter
-  // nod for strong-but-imperfect, and nothing for low scores where confetti would feel wrong).
-  const tier = evaluateMastery(score, total)
-  const presentation = MASTERY_PRESENTATION[tier]
+  // `scoreTier` is the raw score-based tier (5/5 -> mastered). Celebration scales with it: full for
+  // a perfect score, a lighter nod for strong-but-imperfect, nothing for low scores.
+  const scoreTier = evaluateMastery(score, total)
+  // A skill check on its own tops out at Proficient — Mastered is earned later through spaced
+  // retrieval — so what we DISPLAY caps mastered down to proficient. A perfect score still gets the
+  // full celebration above; it just isn't labelled Mastered yet.
+  const displayTier = scoreTier === 'mastered' ? 'proficient' : scoreTier
+  const presentation = MASTERY_PRESENTATION[displayTier]
+  const message = isPerfect
+    ? 'Perfect score! Keep it sharp with daily reviews to earn long-term Mastered status.'
+    : presentation.message
 
   useEffect(() => {
-    if (tier === 'mastered') {
+    if (scoreTier === 'mastered') {
       fireCelebration('full')
-    } else if (tier === 'proficient') {
+    } else if (scoreTier === 'proficient') {
       fireCelebration('light')
     }
-  }, [tier])
+  }, [scoreTier])
 
   return (
     <section className="skillcheck-results">
       <div className="skillcheck-results__card">
-        <div className={`celebrate-badge celebrate-badge--${tier}`} aria-hidden="true">
+        <div className={`celebrate-badge celebrate-badge--${displayTier}`} aria-hidden="true">
           {presentation.badge}
         </div>
         <p className="skillcheck-results__eyebrow">Skill Check complete</p>
         <p className="skillcheck-results__score">
           You scored {score} / {total}
         </p>
+        <p className={`skillcheck-results__tier skillcheck-results__tier--${displayTier}`}>
+          {presentation.label}
+        </p>
         <p
           className={
-            tier === 'needs_review'
+            displayTier === 'needs_review'
               ? 'skillcheck-results__subtitle'
               : 'skillcheck-results__perfect'
           }
         >
-          {presentation.message}
+          {message}
         </p>
       </div>
 

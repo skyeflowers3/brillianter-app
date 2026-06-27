@@ -55,7 +55,7 @@ function conceptOverlap(question: Question, targets: ReadonlySet<string>): numbe
 }
 
 /** All authored templates for a lesson: its lesson questions plus its skill-check questions. */
-async function collectTemplates(lessonId: string): Promise<Question[]> {
+export async function collectTemplates(lessonId: string): Promise<Question[]> {
   const [lessonQuestions, skillCheck] = await Promise.all([
     fetchQuestions(lessonId),
     loadSkillCheckContent(lessonId),

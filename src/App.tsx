@@ -26,6 +26,9 @@ const SkillCheckPage = lazy(() =>
 const RemediationPage = lazy(() =>
   import('./pages/RemediationPage').then((m) => ({ default: m.RemediationPage })),
 )
+const DailyReviewPage = lazy(() =>
+  import('./pages/DailyReviewPage').then((m) => ({ default: m.DailyReviewPage })),
+)
 
 function RouteFallback() {
   return (
@@ -78,6 +81,7 @@ export default function App() {
                 <Route path="/lesson/:lessonId" element={<LessonPage />} />
                 <Route path="/skill-check/:lessonId" element={<SkillCheckPage />} />
                 <Route path="/remediation/:lessonId" element={<RemediationPage />} />
+                <Route path="/daily-review" element={<DailyReviewPage />} />
               </Route>
             </Route>
 

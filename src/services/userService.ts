@@ -23,6 +23,7 @@ export async function createUserDocument(
     currentStreak: 0,
     lastActiveDate: null,
     currentLessonId: 'lesson-1',
+    lastRetrievalQuizDate: null,
   }
 
   await setDoc(doc(db, 'users', userId), profile)
@@ -48,11 +49,25 @@ export async function updateCurrentLessonId(userId: string, lessonId: string): P
   await updateDoc(doc(db, 'users', userId), { currentLessonId: lessonId })
 }
 
+/**
+ * Records the calendar day ('YYYY-MM-DD') the daily retrieval quiz was last shown, which gates it to
+ * once per day. Set whether the learner takes or skips the quiz. Best-effort: a failure here only
+ * risks the quiz reappearing later the same day, so it must not block the caller.
+ */
+export async function setLastRetrievalQuizDate(userId: string, dateKey: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', userId), { lastRetrievalQuizDate: dateKey })
+  } catch (error) {
+    console.warn(`setLastRetrievalQuizDate: failed for ${userId}`, error)
+  }
+}
+
 /** Resets the profile's progress-related fields back to a brand-new-account state. */
 export async function resetUserProgressState(userId: string): Promise<void> {
   await updateDoc(doc(db, 'users', userId), {
     currentStreak: 0,
     lastActiveDate: null,
     currentLessonId: 'lesson-1',
+    lastRetrievalQuizDate: null,
   })
 }
