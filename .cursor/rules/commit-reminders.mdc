@@ -1,0 +1,31 @@
+---
+description: Remind the user to commit and push at natural checkpoints
+alwaysApply: true
+---
+
+# Commit Reminders
+
+Proactively remind the user to commit. Don't let large amounts of work pile up
+uncommitted (it did once — an entire feature phase sat unstaged for a day).
+
+## When to remind
+
+After finishing a meaningful unit of work, end the turn with a short reminder /
+offer to commit. Trigger points:
+
+- A feature or fix is complete and lint/build/tests pass.
+- Right after a successful deploy (the deployed code should be committed too).
+- Before starting a sizeable new piece of work, if there are already uncommitted
+  changes.
+
+Keep it to one line, e.g.: "This is a good checkpoint — want me to commit and
+push?" Never commit without the user's explicit go-ahead.
+
+## How to commit (when asked)
+
+- Stage with `git add -A`, write a concise message (why over what), then push to
+  `origin/main` (single-person project).
+- Never commit secrets or build output. Verify `functions/node_modules`,
+  `functions/lib`, `dist/`, and any real `.env*` keys stay out of the commit.
+  (`.env.production` holding only `VITE_AI_PROVIDER=cloud` is fine.)
+- Prefer smaller, focused commits over one giant batch.

@@ -39,7 +39,6 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
         <span className={`lesson-card__status lesson-card__status--${displayStatus}`}>{label}</span>
       </div>
       <h3 className="lesson-card__title">{lesson.title}</h3>
-      <p className="lesson-card__topic">{lesson.topic}</p>
     </>
   )
 
