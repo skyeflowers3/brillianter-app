@@ -1,0 +1,16 @@
+{
+  "id": "pretest-lesson-1",
+  "type": "drawVector",
+  "prompt": "Draw the vector (4, 3). Best guess; you're not expected to know this yet.",
+  "correctAnswer": {
+    "type": "drawVector",
+    "target": [4, 3],
+    "tolerance": 0.5
+  },
+  "closeThreshold": 3,
+  "reveal": {
+    "default": "Here's the answer: (4, 3). You'll see exactly how to get there in the next few minutes.",
+    "close": "Nice, you were close! The answer is (4, 3).",
+    "correct": "That's correct, the answer is (4, 3)! Now let's see how to get there."
+  }
+}

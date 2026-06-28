@@ -8,8 +8,14 @@ import lesson2SkillCheck from '../content/questions/lesson-2-skillcheck.json'
 import lesson3SkillCheck from '../content/questions/lesson-3-skillcheck.json'
 import lesson4SkillCheck from '../content/questions/lesson-4-skillcheck.json'
 import lesson5SkillCheck from '../content/questions/lesson-5-skillcheck.json'
+import lesson1Pretest from '../content/questions/lesson-1-pretest.json'
+import lesson2Pretest from '../content/questions/lesson-2-pretest.json'
+import lesson3Pretest from '../content/questions/lesson-3-pretest.json'
+import lesson4Pretest from '../content/questions/lesson-4-pretest.json'
+import lesson5Pretest from '../content/questions/lesson-5-pretest.json'
 import { fetchLessons } from './lessonService'
 import type { LessonContent, Question } from '../types/lesson'
+import type { PretestQuestion } from '../types/pretest'
 import { getConceptTags } from '../content/conceptTags'
 
 /**
@@ -55,6 +61,16 @@ const localSkillChecks: Record<string, LessonContent> = {
   'lesson-3': lesson3SkillCheck as unknown as LessonContent,
   'lesson-4': lesson4SkillCheck as unknown as LessonContent,
   'lesson-5': lesson5SkillCheck as unknown as LessonContent,
+}
+
+// Pretest JSON reuses each interaction's authored shape; the discriminated-union literals widen to
+// `string` on import, so we cast through `unknown` (the shapes match the PretestQuestion schema).
+const localPretests: Record<string, PretestQuestion> = {
+  'lesson-1': lesson1Pretest as unknown as PretestQuestion,
+  'lesson-2': lesson2Pretest as unknown as PretestQuestion,
+  'lesson-3': lesson3Pretest as unknown as PretestQuestion,
+  'lesson-4': lesson4Pretest as unknown as PretestQuestion,
+  'lesson-5': lesson5Pretest as unknown as PretestQuestion,
 }
 
 function getLocalIntro(lessonId: string): LessonContent['intro'] {
@@ -123,4 +139,12 @@ export async function loadSkillCheckContent(lessonId: string): Promise<LessonCon
     ...content,
     questions: withConceptTags([...content.questions].sort((a, b) => a.order - b.order)),
   }
+}
+
+/**
+ * The single never-scored pre-lesson attempt for a lesson, if one is authored. Like skill checks,
+ * pretests live in dedicated local JSON (lesson-*-pretest.json) and are never seeded to Firestore.
+ */
+export async function loadPretestContent(lessonId: string): Promise<PretestQuestion | null> {
+  return localPretests[lessonId] ?? null
 }

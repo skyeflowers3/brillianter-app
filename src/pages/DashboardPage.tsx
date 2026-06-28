@@ -3,10 +3,12 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useLessons } from '../hooks/useLessons'
 import { useProgressContext } from '../hooks/useProgressContext'
+import { DailyReviewReminderCard } from '../components/dashboard/DailyReviewReminderCard'
 import { LessonCard } from '../components/dashboard/LessonCard'
 import { ProgressTrackerCard } from '../components/dashboard/ProgressTrackerCard'
 import { StreakBadge } from '../components/dashboard/StreakBadge'
 import { hasStartedLearning, isLessonUnlocked } from '../lib/lessonAccess'
+import { isDailyReviewReminderVisible } from '../lib/dailyReviewReminder'
 import { isRetrievalQuizDue } from '../lib/retrieval'
 
 export function DashboardPage() {
@@ -41,6 +43,10 @@ export function DashboardPage() {
 
   const completedLessons = lessons.filter((lesson) => getProgress(lesson.lessonId)?.completed).length
 
+  // Only shown when the learner explicitly postponed today's review via "Skip for Now" and hasn't
+  // completed it yet. Independent of the redirect gate above (which fires on a fresh login).
+  const showReviewReminder = ready && isDailyReviewReminderVisible(profile, progressByLesson)
+
   if (dailyReviewDue) {
     return <Navigate to="/daily-review" replace />
   }
@@ -58,6 +64,7 @@ export function DashboardPage() {
         <p className="form-error">{error}</p>
       ) : (
         <>
+          {showReviewReminder && <DailyReviewReminderCard />}
           <ProgressTrackerCard completed={completedLessons} total={lessons.length} />
           <div className="dashboard__lesson-grid">
             {lessons.map((lesson) => (

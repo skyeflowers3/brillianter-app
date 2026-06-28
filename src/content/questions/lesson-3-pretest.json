@@ -1,0 +1,20 @@
+{
+  "id": "pretest-lesson-3",
+  "type": "scalarSlider",
+  "mode": "createVector",
+  "prompt": "Where does 2·v land? Predict it.",
+  "referenceLabel": "v = ⟨2, 1⟩",
+  "slider": { "min": -4, "max": 4, "step": 0.5 },
+  "correctAnswer": {
+    "type": "scalarSlider",
+    "baseVector": [2, 1],
+    "scalar": 2,
+    "tolerance": 0.1
+  },
+  "closeThreshold": 3,
+  "reveal": {
+    "default": "Here's the answer: 2·v = (4, 2). You'll see exactly why in this lesson.",
+    "close": "Nice, you were close! 2·v = (4, 2).",
+    "correct": "That's correct, 2·v = (4, 2)! Let's see why."
+  }
+}

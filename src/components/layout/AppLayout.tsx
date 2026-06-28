@@ -1,11 +1,14 @@
 import { useCallback, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useAiEnabled } from '../../hooks/useAiEnabled'
 import { useLessonNavigation } from '../../hooks/useLessonNavigation'
 import { useProgressContext } from '../../hooks/useProgressContext'
+import { setAiEnabled } from '../../lib/aiSettings'
 import { deleteAllLessonProgress } from '../../services/progressService'
 import { deleteMasteryProfile } from '../../services/masteryProfileService'
 import { resetUserProgressState } from '../../services/userService'
+import { clearPretestSeen } from '../../lib/pretestSeen'
 import { LeaveLessonDialog } from './LeaveLessonDialog'
 import { AiTutorWidget } from '../tutor/AiTutorWidget'
 
@@ -16,9 +19,12 @@ export function AppLayout() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const onDashboard = pathname === '/dashboard'
+  const aiEnabled = useAiEnabled()
   // The AI tutor is available while working through a lesson or a personalized review session, but
   // not on the dashboard or during a skill check (where outside help would defeat the assessment).
-  const tutorEnabled = pathname.startsWith('/lesson/') || pathname.startsWith('/remediation/')
+  // It is also hidden whenever AI features are turned off globally.
+  const tutorEnabled =
+    aiEnabled && (pathname.startsWith('/lesson/') || pathname.startsWith('/remediation/'))
 
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [resetting, setResetting] = useState(false)
@@ -33,6 +39,7 @@ export function AppLayout() {
       await deleteAllLessonProgress(user.uid)
       await deleteMasteryProfile(user.uid)
       await resetUserProgressState(user.uid)
+      clearPretestSeen(user.uid)
       await Promise.all([refreshProgress(), refreshProfile()])
       setConfirmingReset(false)
       navigate('/dashboard')
@@ -57,6 +64,15 @@ export function AppLayout() {
         </button>
         <div className="app-header__actions">
           {profile && <span className="app-header__user">Hi, {profile.name}</span>}
+          <button
+            type="button"
+            className="button button--secondary"
+            aria-pressed={aiEnabled}
+            onClick={() => setAiEnabled(!aiEnabled)}
+            title="Turn all AI features (tutor, feedback, AI-generated questions) on or off"
+          >
+            {aiEnabled ? 'Turn AI off' : 'Turn AI on'}
+          </button>
           {!onDashboard && (
             <button
               type="button"

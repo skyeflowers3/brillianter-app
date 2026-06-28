@@ -1,0 +1,96 @@
+.pretest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* The attempt grid and the reveal grid share this single size so the plane keeps the same size and
+   position when the learner locks in. The `section.pretest` prefix outweighs the per-type
+   `.coordinate-plane` caps in lesson.css regardless of stylesheet order; max-width only raises the
+   cap, so 320px screens still fit. */
+section.pretest .coordinate-plane {
+  max-width: 571px;
+}
+
+/* The attempt wrapper must be full width; otherwise it shrinks to content as a centered flex item
+   and the grid (width: 100%) collapses well below the cap above. The grid is then centered
+   explicitly so it lines up with the reveal grid. */
+.pretest__attempt {
+  width: 100%;
+}
+
+.pretest__attempt > * {
+  width: 100%;
+}
+
+.pretest__attempt .coordinate-plane {
+  display: block;
+  margin-inline: auto;
+}
+
+.pretest__intro {
+  margin: 0;
+  color: #ffffff;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.pretest__prompt {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  line-height: 1.35;
+}
+
+.pretest__reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.pretest__plane {
+  width: 100%;
+}
+
+.pretest__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.pretest__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pretest__swatch {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.2rem;
+}
+
+.pretest__caption {
+  margin: 0;
+  max-width: 44ch;
+  text-align: center;
+  line-height: 1.45;
+}
+
+/* Keep the primary action a comfortable touch target on small screens. */
+.pretest .button {
+  min-height: 44px;
+}

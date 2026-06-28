@@ -13,6 +13,7 @@ const NEW_ACCOUNT_PROGRESS_STATE = {
   lastActiveDate: null,
   currentLessonId: 'lesson-1',
   lastRetrievalQuizDate: null,
+  dailyReviewDeferredDate: null,
 } satisfies Partial<UserProfile>
 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
@@ -69,6 +70,32 @@ export async function setLastRetrievalQuizDate(userId: string, dateKey: string):
     await updateDoc(doc(db, 'users', userId), { lastRetrievalQuizDate: dateKey })
   } catch (error) {
     console.warn(`setLastRetrievalQuizDate: failed for ${userId}`, error)
+  }
+}
+
+/**
+ * Records the calendar day ('YYYY-MM-DD') the learner deferred today's daily review by pressing
+ * "Skip for Now". The dashboard reminder card keys off this. Best-effort: a failure here only means
+ * the reminder card won't appear, so it must not block returning to the dashboard.
+ */
+export async function setDailyReviewDeferred(userId: string, dateKey: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', userId), { dailyReviewDeferredDate: dateKey })
+  } catch (error) {
+    console.warn(`setDailyReviewDeferred: failed for ${userId}`, error)
+  }
+}
+
+/**
+ * Clears the deferred-review flag once the learner completes that day's review, so the dashboard
+ * reminder card disappears. Best-effort: a failure only risks the card lingering until the date no
+ * longer matches today, so it must not block the completion flow.
+ */
+export async function clearDailyReviewDeferred(userId: string): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', userId), { dailyReviewDeferredDate: null })
+  } catch (error) {
+    console.warn(`clearDailyReviewDeferred: failed for ${userId}`, error)
   }
 }
 

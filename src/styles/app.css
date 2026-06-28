@@ -329,6 +329,42 @@
   color: var(--text);
 }
 
+.review-reminder-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.review-reminder-card__body {
+  flex: 1 1 260px;
+}
+
+.review-reminder-card__title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.review-reminder-card__text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.review-reminder-card__action {
+  flex: 0 0 auto;
+  min-height: 44px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
 .dashboard__lesson-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

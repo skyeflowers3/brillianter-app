@@ -11,6 +11,8 @@ import {
   type RetrievalQuiz,
   type RetrievalResultsSummary,
 } from '../services/retrievalQuizService'
+import { clearDailyReviewDeferred, setDailyReviewDeferred } from '../services/userService'
+import { toDateKey } from '../lib/dates'
 import type { SkillCheckAnswer } from '../types/progress'
 
 /**
@@ -76,7 +78,10 @@ export function DailyReviewPage() {
   const handleSkip = useCallback(async () => {
     if (user) {
       try {
+        // Gate the quiz for today AND record that the learner postponed it, so the dashboard shows
+        // the "Daily Review Available" reminder until they complete it.
         await markRetrievalQuizShown(user.uid)
+        await setDailyReviewDeferred(user.uid, toDateKey(new Date()))
         await refreshProfile()
       } catch (skipError) {
         console.warn('Failed to mark daily review skipped', skipError)
@@ -92,6 +97,9 @@ export function DailyReviewPage() {
       }
       try {
         const result = await recordRetrievalResults(user.uid, quiz.questionLessonMap, answers)
+        // Completing today's review clears the postponed flag so the dashboard reminder disappears.
+        // Only happens here, after results are recorded — simply opening the review never clears it.
+        await clearDailyReviewDeferred(user.uid)
         setSummary(result)
         await Promise.all([refreshProgress(), refreshProfile()])
       } catch (recordError) {

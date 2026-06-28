@@ -1,0 +1,17 @@
+{
+  "id": "pretest-lesson-2",
+  "type": "headToTailFree",
+  "prompt": "What's a + b? Fill in the result.",
+  "correctAnswer": {
+    "type": "headToTailFree",
+    "vectorA": [3, 1],
+    "vectorB": [1, 2],
+    "tolerance": 0.5
+  },
+  "closeThreshold": 3,
+  "reveal": {
+    "default": "Here's the answer: a + b = (4, 3). You'll see exactly how to add them in this lesson.",
+    "close": "Nice, you were close! a + b = (4, 3).",
+    "correct": "That's correct, a + b = (4, 3)! Let's see why."
+  }
+}

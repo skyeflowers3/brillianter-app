@@ -1,0 +1,18 @@
+{
+  "id": "pretest-lesson-4",
+  "type": "vectorSubtract",
+  "gated": false,
+  "prompt": "What's a - b? Take your best guess.",
+  "correctAnswer": {
+    "type": "vectorSubtract",
+    "vectorA": [4, 3],
+    "vectorB": [1, 2],
+    "tolerance": 0.5
+  },
+  "closeThreshold": 3,
+  "reveal": {
+    "default": "Here's the answer: a - b = (3, 1). You'll see exactly how to subtract them in this lesson.",
+    "close": "Nice, you were close! a - b = (3, 1).",
+    "correct": "That's correct, a - b = (3, 1)! Let's see why."
+  }
+}

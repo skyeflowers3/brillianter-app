@@ -46,7 +46,9 @@ import { LessonComplete } from './LessonComplete'
 import { LessonIntro } from './LessonIntro'
 import { LessonInterstitialPanel } from './LessonInterstitialPanel'
 import { LessonStepper } from './LessonStepper'
+import { PretestPanel } from './PretestPanel'
 import { QuestionRenderer } from './QuestionRenderer'
+import type { PretestQuestion } from '../../types/pretest'
 
 /** A snapshot of one question's in-session state, used for back/forward navigation. */
 interface QuestionSnapshot {
@@ -68,6 +70,12 @@ interface LessonEngineProps {
   persistHandlers?: LessonEnginePersistHandlers
   /** Concept-level mastery snapshot, used to surface adaptive strategy nudges. Optional. */
   masteryProfile?: MasteryProfile | null
+  /** The never-scored pre-lesson attempt shown before the intro, if one is authored. */
+  pretest?: PretestQuestion | null
+  /** Whether this learner has already seen this lesson's pretest (so it shows only once). */
+  pretestSeen?: boolean
+  /** Called when the learner finishes the pretest, so the page can record it as seen. */
+  onPretestSeen?: () => void
 }
 
 export function LessonEngine({
@@ -78,6 +86,9 @@ export function LessonEngine({
   initialAnswers,
   persistHandlers,
   masteryProfile,
+  pretest,
+  pretestSeen = false,
+  onPretestSeen,
 }: LessonEngineProps) {
   const { setLessonSession } = useLessonNavigation()
   const { setQuestionContext } = useTutorContext()
@@ -114,14 +125,18 @@ export function LessonEngine({
   // end) must never write progress, so a review can't reset a finished/mastered lesson. "Retry"
   // leaves review by resetting the lesson, after which the fresh attempt persists normally.
   const [reviewing, setReviewing] = useState(initialCompleted)
-  const [showIntro, setShowIntro] = useState(
-    Boolean(lesson.intro) &&
-      initialIndex === 0 &&
-      !initialCompleted &&
-      !initialResumeState?.interactionState &&
-      (initialResumeState?.phase ?? 'exploring') === 'exploring' &&
-      (initialResumeState?.attempts ?? 0) === 0,
+  // First-entry gate shared by the pretest and the intro: only on a fresh start of the lesson.
+  const isFreshLessonStart =
+    initialIndex === 0 &&
+    !initialCompleted &&
+    !initialResumeState?.interactionState &&
+    (initialResumeState?.phase ?? 'exploring') === 'exploring' &&
+    (initialResumeState?.attempts ?? 0) === 0
+  // The pretest runs before the intro, but only on the learner's first visit to this lesson.
+  const [showPretest, setShowPretest] = useState(
+    Boolean(pretest) && !pretestSeen && isFreshLessonStart,
   )
+  const [showIntro, setShowIntro] = useState(Boolean(lesson.intro) && isFreshLessonStart)
   const [questionState, setQuestionState] = useState<QuestionInteractionState>(() => {
     if (initialAnswerSnapshot) {
       return initialAnswerSnapshot.interactionState
@@ -625,6 +640,28 @@ export function LessonEngine({
         totalQuestions={totalQuestions}
         onRetry={() => void handleRetryLesson()}
       />
+    )
+  }
+
+  if (showPretest && pretest) {
+    // The pretest is required, so its screen intentionally omits the question stepper (no skipping
+    // ahead). Leaving to the dashboard without finishing simply means it shows again next time.
+    return (
+      <section className="lesson-engine">
+        <header className="lesson-engine__header">
+          <div>
+            <p className="lesson-engine__topic">{lesson.topic}</p>
+            <h1 className="lesson-engine__title">{lesson.title}</h1>
+          </div>
+        </header>
+        <PretestPanel
+          pretest={pretest}
+          onContinue={() => {
+            onPretestSeen?.()
+            setShowPretest(false)
+          }}
+        />
+      </section>
     )
   }
 

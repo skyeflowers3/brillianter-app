@@ -128,8 +128,8 @@ export function LessonCard({ lesson, progress, locked = false }: LessonCardProps
             )}
             {masteryStatus === 'proficient' && (
               <span className="lesson-card__retrieval">
-                Spaced reviews: {Math.min(retrievalDays, RETRIEVALS_FOR_MASTERY)}/
-                {RETRIEVALS_FOR_MASTERY} toward Mastered
+                Pass {RETRIEVALS_FOR_MASTERY} daily reviews to reach Mastery (
+                {Math.min(retrievalDays, RETRIEVALS_FOR_MASTERY)}/{RETRIEVALS_FOR_MASTERY} done)
               </span>
             )}
           </>

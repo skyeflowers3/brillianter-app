@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LessonEngine } from '../components/lesson/LessonEngine'
 import { useAuth } from '../hooks/useAuth'
 import { useProgressContext } from '../hooks/useProgressContext'
 import { buildAnsweredSnapshots, buildLessonResumeState } from '../lib/lessonResume'
-import { loadLessonContent } from '../services/questionService'
+import { isPretestSeen, markPretestSeen } from '../lib/pretestSeen'
+import { loadLessonContent, loadPretestContent } from '../services/questionService'
 import {
   ensureLessonProgress,
   resetLessonProgress,
@@ -13,6 +14,7 @@ import { updateCurrentLessonId } from '../services/userService'
 import { applyConceptOutcomes, getMasteryProfile } from '../services/masteryProfileService'
 import { getConceptTags } from '../content/conceptTags'
 import type { LessonContent } from '../types/lesson'
+import type { PretestQuestion } from '../types/pretest'
 import type { MasteryProfile } from '../types/masteryProfile'
 import type { LessonEnginePersistHandlers } from '../types/lessonEngine'
 import type { LessonProgress, QuestionHistoryEntry } from '../types/progress'
@@ -30,6 +32,7 @@ export function LessonPage() {
     loading: progressLoading,
   } = useProgressContext()
   const [lesson, setLesson] = useState<LessonContent | null>(null)
+  const [pretest, setPretest] = useState<PretestQuestion | null>(null)
   const [progress, setProgress] = useState<LessonProgress | null>(null)
   // Snapshot taken at lesson load; drives adaptive strategy nudges. Best-effort — failure just means
   // no nudge, never a blocked lesson.
@@ -66,9 +69,10 @@ export function LessonPage() {
           throw new Error('This lesson is not available yet.')
         }
 
-        const [lessonContent, lessonProgress] = await Promise.all([
+        const [lessonContent, lessonProgress, pretestContent] = await Promise.all([
           loadLessonContent(activeLessonId),
           ensureLessonProgress(activeUser.uid, activeLessonId),
+          loadPretestContent(activeLessonId),
         ])
 
         if (!lessonContent) {
@@ -79,6 +83,7 @@ export function LessonPage() {
 
         if (!cancelled) {
           setLesson(lessonContent)
+          setPretest(pretestContent)
           setProgress({
             ...lessonProgress,
             awaitingContinue: lessonProgress.awaitingContinue ?? false,
@@ -180,6 +185,12 @@ export function LessonPage() {
     }
   }, [lessonId, progress, upsertProgress, user])
 
+  const handlePretestSeen = useCallback(() => {
+    if (user && lessonId) {
+      markPretestSeen(user.uid, lessonId)
+    }
+  }, [lessonId, user])
+
   if (!lessonId) {
     return (
       <section className="lesson-error">
@@ -223,6 +234,8 @@ export function LessonPage() {
   const resumeState = buildLessonResumeState(lesson, cachedProgress)
   const answeredSnapshots = buildAnsweredSnapshots(lesson, cachedProgress)
 
+  const pretestSeen = user ? isPretestSeen(user.uid, lessonId) : true
+
   return (
     <LessonEngine
       lesson={lesson}
@@ -232,6 +245,9 @@ export function LessonPage() {
       initialAnswers={answeredSnapshots}
       persistHandlers={persistHandlers}
       masteryProfile={masteryProfile}
+      pretest={pretest}
+      pretestSeen={pretestSeen}
+      onPretestSeen={handlePretestSeen}
     />
   )
 }

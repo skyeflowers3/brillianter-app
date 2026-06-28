@@ -1,0 +1,24 @@
+{
+  "id": "pretest-lesson-5",
+  "type": "constructCombo",
+  "mode": "construct",
+  "gated": false,
+  "expressionLabel": "3a + b",
+  "referenceLabel": "a = ⟨1, 1⟩, b = ⟨1, -1⟩",
+  "prompt": "What is 3a + b? Fill in the resulting vector.",
+  "correctAnswer": {
+    "type": "constructCombo",
+    "vectorA": [1, 1],
+    "vectorB": [1, -1],
+    "coefA": 3,
+    "coefB": 1,
+    "target": [4, 2],
+    "tolerance": 0.5
+  },
+  "closeThreshold": 3,
+  "reveal": {
+    "default": "Here's the answer: 3a + b = (4, 2). You'll see exactly how to build it in this lesson.",
+    "close": "Nice, you were close! 3a + b = (4, 2).",
+    "correct": "That's correct, 3a + b = (4, 2)! Let's see why."
+  }
+}
